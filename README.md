@@ -2,6 +2,8 @@
 
 **Find a roommate who shares your deen, on a map.**
 
+![Manara map with a listing open](docs/screenshot.jpg)
+
 Manara is a Zillow-style roommate finder for Muslim college students. Browse rooms on a full-screen map, tap a price pin, and see what matters: private or shared room, your actual share of the rent, average utilities, halal kitchen, pets, and whether the place is brothers-only or sisters-only.
 
 ## Anti-creep gate: `.edu` only
