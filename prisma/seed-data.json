@@ -1,32 +1,606 @@
 [
   {
-    "title": "Quiet private room near UCLA",
-    "address": "Gayley Ave, Westwood, CA",
-    "lat": 34.0663, "lng": -118.4500,
+    "title": "Quiet private room on Glenrock, 8 min walk to Bruin Walk",
+    "address": "Glenrock Ave, Westwood, CA",
+    "lat": 34.0655, "lng": -118.4535,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 4500, "rentShare": 1500, "avgUtilities": 95,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Eight-minute walk to Bruin Walk, so you won't need a parking permit. Two grad students and a senior live here, and the house goes quiet after Isha so people can study.",
+    "contactEmail": "ucla-brothers-01@example.edu"
+  },
+  {
+    "title": "Sisters' shared room on Kelton, bike to Royce in 6",
+    "address": "Kelton Ave, Westwood, CA",
+    "lat": 34.0605, "lng": -118.4475,
+    "roomType": "SHARED", "totalRoommates": 4, "beds": 2, "baths": 2,
+    "totalRent": 4400, "rentShare": 1100, "avgUtilities": 80,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Two sisters to a room in a sunny 2-bed. Royce Hall is a six-minute bike ride. In Ramadan we do iftar together most nights and take turns cooking.",
+    "contactEmail": "ucla-sisters-02@example.edu"
+  },
+  {
+    "title": "Calm 2-bed on Midvale with a balcony and a cat",
+    "address": "Midvale Ave, Westwood, CA",
+    "lat": 34.0565, "lng": -118.4440,
+    "roomType": "PRIVATE", "totalRoommates": 2, "beds": 2, "baths": 1,
+    "totalRent": 3600, "rentShare": 1800, "avgUtilities": 70,
+    "petsAllowed": true, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "It's me (third-year nursing) plus Zaytoon, a very lazy cat. Small balcony that gets afternoon sun. Campus is a 15-minute walk, or hop on the Big Blue Bus up Westwood Blvd.",
+    "contactEmail": "ucla-sisters-03@example.edu"
+  },
+  {
+    "title": "Brothers' house on Veteran, Fajr crew included",
+    "address": "Veteran Ave, Westwood, CA",
+    "lat": 34.0595, "lng": -118.4490,
+    "roomType": "SHARED", "totalRoommates": 5, "beds": 3, "baths": 2,
+    "totalRent": 5200, "rentShare": 950, "avgUtilities": 110,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Five brothers, three bedrooms. There's always someone awake for Fajr, and we walk up to the campus musalla together for Jumu'ah. Open spot is a shared bed in the big room.",
+    "contactEmail": "ucla-brothers-04@example.edu"
+  },
+  {
+    "title": "4th room open in an engineers' house on Malcolm",
+    "address": "Malcolm Ave, Westwood, CA",
+    "lat": 34.0590, "lng": -118.4395,
+    "roomType": "PRIVATE", "totalRoommates": 4, "beds": 4, "baths": 2,
+    "totalRent": 6400, "rentShare": 1650, "avgUtilities": 120,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Three EE and CS majors looking for a fourth. One living room wall is a whiteboard, which tells you how weeknights go. Boelter Hall is a 12-minute walk.",
+    "contactEmail": "ucla-brothers-05@example.edu"
+  },
+  {
+    "title": "Selby Ave room, brothers upstairs and sisters downstairs",
+    "address": "Selby Ave, Westwood, CA",
+    "lat": 34.0560, "lng": -118.4370,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 4800, "rentShare": 1600, "avgUtilities": 100,
+    "petsAllowed": true, "halalKitchen": false, "genderPref": "ANY",
+    "description": "Each floor has its own bathroom. We share the kitchen, which isn't strictly halal, but every shelf and pan is labeled. About a 20-minute walk, or five on a scooter.",
+    "contactEmail": "ucla-mixed-06@example.edu"
+  },
+  {
+    "title": "Shared room for a sister off Ohio Ave",
+    "address": "Ohio Ave, Westwood, CA",
+    "lat": 34.0525, "lng": -118.4445,
+    "roomType": "SHARED", "totalRoommates": 4, "beds": 2, "baths": 1.5,
+    "totalRent": 3800, "rentShare": 950, "avgUtilities": 75,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "There's a coffee shop around the corner that stays open late, so finals week is covered. On Sundays someone does a halal grocery run on Westwood Blvd. The bus gets you to campus in about 10 minutes.",
+    "contactEmail": "ucla-sisters-07@example.edu"
+  },
+  {
+    "title": "Own room and own bathroom on Wellworth",
+    "address": "Wellworth Ave, Westwood, CA",
+    "lat": 34.0598, "lng": -118.4430,
+    "roomType": "PRIVATE", "totalRoommates": 2, "beds": 2, "baths": 2,
+    "totalRent": 3900, "rentShare": 1950, "avgUtilities": 65,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Two beds and two baths, so nobody waits in line before an 8am. I'm looking for a tidy brother who doesn't mind me reciting Quran after Fajr. Ten-minute walk to campus.",
+    "contactEmail": "ucla-brothers-08@example.edu"
+  },
+  {
+    "title": "Brentwood sisters' apartment with a dog-friendly yard",
+    "address": "Barrington Ave, Brentwood, CA",
+    "lat": 34.0510, "lng": -118.4620,
+    "roomType": "SHARED", "totalRoommates": 3, "beds": 2, "baths": 1,
+    "totalRent": 3300, "rentShare": 900, "avgUtilities": 60,
+    "petsAllowed": true, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "You'd share a room with one sister. Our third roommate has a sleepy senior dog. Big Blue Bus to campus takes about 15 minutes, and on Ramadan weekends we open our fast together.",
+    "contactEmail": "ucla-sisters-09@example.edu"
+  },
+  {
+    "title": "Sawtelle room in a mixed grad-student house",
+    "address": "Brockton Ave, Sawtelle, CA",
+    "lat": 34.0400, "lng": -118.4440,
     "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
     "totalRent": 4200, "rentShare": 1400, "avgUtilities": 90,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "ANY",
+    "description": "Two PhD students (a brother and a sister) with separate wings. The Sawtelle noodle shops are down the block for after-lab dinners. It's a 15-minute bike ride up to campus.",
+    "contactEmail": "ucla-mixed-10@example.edu"
+  },
+  {
+    "title": "Six brothers, one big kitchen on Corinth",
+    "address": "Corinth Ave, Sawtelle, CA",
+    "lat": 34.0365, "lng": -118.4440,
+    "roomType": "SHARED", "totalRoommates": 6, "beds": 3, "baths": 2,
+    "totalRent": 5100, "rentShare": 850, "avgUtilities": 140,
     "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
-    "description": "5 min walk to campus, 10 min drive to the masjid. Fajr crew in the house.",
-    "contactEmail": "yusuf@ucla.edu"
+    "description": "Probably the cheapest way to live near UCLA: a shared room in a 3-bed with six brothers. We meal-prep in bulk on Sundays and split the grocery bill. Iftar here is a whole event.",
+    "contactEmail": "ucla-brothers-11@example.edu"
   },
   {
-    "title": "Shared room, sisters-only townhouse",
-    "address": "Durant Ave, Berkeley, CA",
-    "lat": 37.8676, "lng": -122.2590,
-    "roomType": "SHARED", "totalRoommates": 4, "beds": 3, "baths": 1.5,
-    "totalRent": 3800, "rentShare": 750, "avgUtilities": 60,
+    "title": "Palms 2-bed for a sister, kitchen not halal-only",
+    "address": "Overland Ave, Palms, CA",
+    "lat": 34.0335, "lng": -118.4180,
+    "roomType": "PRIVATE", "totalRoommates": 2, "beds": 2, "baths": 1,
+    "totalRent": 3000, "rentShare": 1500, "avgUtilities": 70,
+    "petsAllowed": true, "halalKitchen": false, "genderPref": "SISTERS",
+    "description": "My roommate is Muslim but sometimes cooks non-halal, so we keep separate pans and shelves. The Culver CityBus 6 runs straight up to campus in about 20 minutes.",
+    "contactEmail": "ucla-sisters-12@example.edu"
+  },
+
+  {
+    "title": "Brothers' 4-bed on 27th, walk to Jumu'ah",
+    "address": "W 27th St, North University Park, Los Angeles, CA",
+    "lat": 34.0300, "lng": -118.2830,
+    "roomType": "PRIVATE", "totalRoommates": 4, "beds": 4, "baths": 2,
+    "totalRent": 4400, "rentShare": 1100, "avgUtilities": 120,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Leavey Library is a ten-minute walk. On Fridays we walk to Masjid Umar on Exposition for Jumu'ah. We need a fourth who can live with a few early Fajr alarms.",
+    "contactEmail": "usc-brothers-01@example.edu"
+  },
+  {
+    "title": "Sisters' shared room on Menlo, gated building",
+    "address": "Menlo Ave, University Park, Los Angeles, CA",
+    "lat": 34.0310, "lng": -118.2880,
+    "roomType": "SHARED", "totalRoommates": 4, "beds": 2, "baths": 1,
+    "totalRent": 3200, "rentShare": 800, "avgUtilities": 70,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Gated entry with a night shuttle stop at the corner, which our parents liked a lot. You'd share with a dental student who's out the door by 7.",
+    "contactEmail": "usc-sisters-02@example.edu"
+  },
+  {
+    "title": "Portland St room with a backyard herb garden",
+    "address": "Portland St, University Park, Los Angeles, CA",
+    "lat": 34.0290, "lng": -118.2790,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 3600, "rentShare": 1200, "avgUtilities": 95,
     "petsAllowed": true, "halalKitchen": true, "genderPref": "SISTERS",
-    "description": "Cat-friendly. Halal-only kitchen, shared groceries optional. Near MSA prayer room.",
-    "contactEmail": "maryam@berkeley.edu"
+    "description": "We grow mint and cilantro out back, so chai and chutney are always homemade. The kitchen is halal and there's one friendly rabbit. Seven-minute bike to campus.",
+    "contactEmail": "usc-sisters-03@example.edu"
   },
   {
-    "title": "Private room by USC, any gender floor split",
-    "address": "W 30th St, Los Angeles, CA",
-    "lat": 34.0259, "lng": -118.2805,
-    "roomType": "PRIVATE", "totalRoommates": 2, "beds": 2, "baths": 2,
-    "totalRent": 3000, "rentShare": 1500, "avgUtilities": 110,
+    "title": "Severance St duplex, separate entrances",
+    "address": "Severance St, North University Park, Los Angeles, CA",
+    "lat": 34.0322, "lng": -118.2790,
+    "roomType": "PRIVATE", "totalRoommates": 2, "beds": 2, "baths": 1,
+    "totalRent": 2700, "rentShare": 1350, "avgUtilities": 60,
     "petsAllowed": false, "halalKitchen": false, "genderPref": "ANY",
-    "description": "Separate floors, separate bathrooms. Kitchen not strictly halal.",
-    "contactEmail": "omar@usc.edu"
+    "description": "Old Craftsman split in two, with a brother on one side and a sister on the other, each with their own door. The shared kitchen isn't halal-only. About a 15-minute walk to class.",
+    "contactEmail": "usc-mixed-04@example.edu"
+  },
+  {
+    "title": "Top bunk in a five-brother house on Orchard",
+    "address": "Orchard Ave, North University Park, Los Angeles, CA",
+    "lat": 34.0315, "lng": -118.2845,
+    "roomType": "SHARED", "totalRoommates": 5, "beds": 3, "baths": 2,
+    "totalRent": 4100, "rentShare": 750, "avgUtilities": 110,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Loud on game nights and dead silent during finals. We pool money for a monthly halal meat run to Koreatown. The open spot is the top bunk in the biggest room.",
+    "contactEmail": "usc-brothers-05@example.edu"
+  },
+  {
+    "title": "Study-first sisters' house on Raymond",
+    "address": "Raymond Ave, University Park, Los Angeles, CA",
+    "lat": 34.0300, "lng": -118.2905,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 1.5,
+    "totalRent": 3300, "rentShare": 1100, "avgUtilities": 85,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "All three of us are pre-med, so the dining table basically doubles as a library. The walk to campus is ten minutes on well-lit streets.",
+    "contactEmail": "usc-sisters-06@example.edu"
+  },
+  {
+    "title": "Budlong shared room by Exposition Park",
+    "address": "Budlong Ave, Exposition Park, Los Angeles, CA",
+    "lat": 34.0150, "lng": -118.2935,
+    "roomType": "SHARED", "totalRoommates": 4, "beds": 2, "baths": 1,
+    "totalRent": 2800, "rentShare": 700, "avgUtilities": 65,
+    "petsAllowed": true, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "After Fajr we run laps around the Rose Garden in Expo Park. There's a cat in the house. It's a 12-minute walk to campus.",
+    "contactEmail": "usc-brothers-07@example.edu"
+  },
+  {
+    "title": "Normandie room, short walk to the E Line",
+    "address": "Normandie Ave, University Park, Los Angeles, CA",
+    "lat": 34.0230, "lng": -118.3000,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 3000, "rentShare": 1000, "avgUtilities": 90,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "The Expo/Vermont station is a short walk, which is handy for internships downtown. Brothers only, halal kitchen, and someone usually makes biryani on Sundays.",
+    "contactEmail": "usc-brothers-08@example.edu"
+  },
+  {
+    "title": "Newer 2-bed on 37th with in-unit laundry",
+    "address": "W 37th St, Exposition Park, Los Angeles, CA",
+    "lat": 34.0185, "lng": -118.2930,
+    "roomType": "PRIVATE", "totalRoommates": 2, "beds": 2, "baths": 2,
+    "totalRent": 3200, "rentShare": 1600, "avgUtilities": 75,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Built a few years ago: in-unit laundry and your own bathroom. Masjid Umar is close enough to walk to for Taraweeh in Ramadan.",
+    "contactEmail": "usc-sisters-09@example.edu"
+  },
+  {
+    "title": "Hoover St house for six brothers",
+    "address": "Hoover St, North University Park, Los Angeles, CA",
+    "lat": 34.0335, "lng": -118.2860,
+    "roomType": "SHARED", "totalRoommates": 6, "beds": 3, "baths": 2,
+    "totalRent": 4200, "rentShare": 700, "avgUtilities": 150,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Big old house with AC that actually works in September. Every other Thursday we host the MSA brothers' halaqa in the living room.",
+    "contactEmail": "usc-brothers-10@example.edu"
+  },
+  {
+    "title": "Budget room on 41st in a mixed grad house",
+    "address": "W 41st St, Vermont Square, Los Angeles, CA",
+    "lat": 34.0105, "lng": -118.2915,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 1,
+    "totalRent": 2700, "rentShare": 900, "avgUtilities": 80,
+    "petsAllowed": true, "halalKitchen": false, "genderPref": "ANY",
+    "description": "Cheapest private room this close to USC we've found. Two grad students (a brother and a sister) plus a dog. The kitchen is shared and not halal-only. 15-minute bike up Vermont.",
+    "contactEmail": "usc-mixed-11@example.edu"
+  },
+  {
+    "title": "Catalina St shared room for a sister",
+    "address": "S Catalina St, University Park, Los Angeles, CA",
+    "lat": 34.0300, "lng": -118.2935,
+    "roomType": "SHARED", "totalRoommates": 3, "beds": 2, "baths": 1,
+    "totalRent": 2700, "rentShare": 750, "avgUtilities": 55,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Quiet street. You'd share with a social work junior. When we're both home we pray Maghrib together. Twelve-minute walk to campus.",
+    "contactEmail": "usc-sisters-12@example.edu"
+  },
+
+  {
+    "title": "Linden St room, a short walk from the Islamic Center",
+    "address": "Linden St, University, Riverside, CA",
+    "lat": 33.9790, "lng": -117.3370,
+    "roomType": "PRIVATE", "totalRoommates": 4, "beds": 4, "baths": 2,
+    "totalRent": 2800, "rentShare": 700, "avgUtilities": 120,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "The Islamic Center of Riverside is just down Linden, so Fajr in jamaah is actually doable. Campus is a ten-minute walk.",
+    "contactEmail": "ucr-brothers-01@example.edu"
+  },
+  {
+    "title": "Shared room on Blaine for under $500",
+    "address": "Blaine St, University, Riverside, CA",
+    "lat": 33.9830, "lng": -117.3300,
+    "roomType": "SHARED", "totalRoommates": 4, "beds": 2, "baths": 1,
+    "totalRent": 1900, "rentShare": 475, "avgUtilities": 70,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Two sisters per room. The bus stop on Blaine gets you to the Bell Tower in about five minutes, and the halal market on University Ave is close by.",
+    "contactEmail": "ucr-sisters-02@example.edu"
+  },
+  {
+    "title": "Iowa Ave sisters' house with a tabby",
+    "address": "Iowa Ave, University, Riverside, CA",
+    "lat": 33.9780, "lng": -117.3380,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 2250, "rentShare": 750, "avgUtilities": 90,
+    "petsAllowed": true, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "The tabby's name is Kunafa and she will sit on your laptop. We have a big backyard and a halal kitchen, and campus is a 12-minute bike ride.",
+    "contactEmail": "ucr-sisters-03@example.edu"
+  },
+  {
+    "title": "Hillside 2-bed on Big Springs, walk down to class",
+    "address": "Big Springs Rd, Box Springs, Riverside, CA",
+    "lat": 33.9700, "lng": -117.3200,
+    "roomType": "PRIVATE", "totalRoommates": 2, "beds": 2, "baths": 2,
+    "totalRent": 1900, "rentShare": 950, "avgUtilities": 60,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Right up against the Box Springs hills, and we hike the C trail on weekends. It's a ten-minute walk down to class. Own bathroom.",
+    "contactEmail": "ucr-brothers-04@example.edu"
+  },
+  {
+    "title": "Watkins Dr shared room, cheapest near UCR",
+    "address": "Watkins Dr, Box Springs, Riverside, CA",
+    "lat": 33.9700, "lng": -117.3170,
+    "roomType": "SHARED", "totalRoommates": 5, "beds": 3, "baths": 2,
+    "totalRent": 2600, "rentShare": 450, "avgUtilities": 100,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Five brothers, mostly transfers from community college like you probably are. Shared room for $450. We cook dal and rice in big batches and walk to campus in 12 minutes.",
+    "contactEmail": "ucr-brothers-05@example.edu"
+  },
+  {
+    "title": "Canyon Crest room with separate floors",
+    "address": "Canyon Crest Dr, Canyon Crest, Riverside, CA",
+    "lat": 33.9580, "lng": -117.3350,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 2400, "rentShare": 800, "avgUtilities": 95,
+    "petsAllowed": true, "halalKitchen": false, "genderPref": "ANY",
+    "description": "Brothers sleep upstairs and sisters downstairs. The kitchen is shared and not halal-only. There's a grocery store in walking distance, and campus is about 15 minutes by bike.",
+    "contactEmail": "ucr-mixed-06@example.edu"
+  },
+  {
+    "title": "Valencia Hill townhouse for four sisters",
+    "address": "Valencia Hill Dr, Canyon Crest, Riverside, CA",
+    "lat": 33.9625, "lng": -117.3330,
+    "roomType": "PRIVATE", "totalRoommates": 4, "beds": 4, "baths": 2.5,
+    "totalRent": 3000, "rentShare": 750, "avgUtilities": 130,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Townhouse complex with a pool we actually use in the heat. Four sisters, own rooms. In Ramadan we set up iftar on the patio and invite the MSA sisters.",
+    "contactEmail": "ucr-sisters-07@example.edu"
+  },
+  {
+    "title": "Chicago Ave shared room, 3 brothers",
+    "address": "Chicago Ave, Eastside, Riverside, CA",
+    "lat": 33.9700, "lng": -117.3460,
+    "roomType": "SHARED", "totalRoommates": 3, "beds": 2, "baths": 1,
+    "totalRent": 1700, "rentShare": 500, "avgUtilities": 55,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Small but cheap. You'd share a room with a second-year bio major. RTA bus to campus is about ten minutes, or bike it in eight.",
+    "contactEmail": "ucr-brothers-08@example.edu"
+  },
+  {
+    "title": "Mt Vernon 2-bed with a sister and her bunny",
+    "address": "Mt Vernon Ave, University, Riverside, CA",
+    "lat": 33.9760, "lng": -117.3420,
+    "roomType": "PRIVATE", "totalRoommates": 2, "beds": 2, "baths": 1,
+    "totalRent": 1750, "rentShare": 875, "avgUtilities": 50,
+    "petsAllowed": true, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "I'm a fourth-year with a very calm bunny. I'm up for Fajr and then off to the library early, so the apartment stays quiet in the mornings.",
+    "contactEmail": "ucr-sisters-09@example.edu"
+  },
+  {
+    "title": "Ottawa Ave room in a mixed house, own lock",
+    "address": "Ottawa Ave, University, Riverside, CA",
+    "lat": 33.9840, "lng": -117.3285,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 1,
+    "totalRent": 2100, "rentShare": 700, "avgUtilities": 80,
+    "petsAllowed": false, "halalKitchen": false, "genderPref": "ANY",
+    "description": "Every bedroom has its own lock. Two grad students live here now, a brother and a sister. The kitchen isn't halal-only. Eight-minute walk to campus.",
+    "contactEmail": "ucr-mixed-10@example.edu"
+  },
+  {
+    "title": "MLK Blvd sisters' apartment, two baths",
+    "address": "Martin Luther King Blvd, Canyon Crest, Riverside, CA",
+    "lat": 33.9620, "lng": -117.3370,
+    "roomType": "SHARED", "totalRoommates": 4, "beds": 2, "baths": 2,
+    "totalRent": 2200, "rentShare": 550, "avgUtilities": 75,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Two shared rooms, each with its own bathroom, which helps a lot during wudu traffic. The bus to campus runs right outside.",
+    "contactEmail": "ucr-sisters-11@example.edu"
+  },
+  {
+    "title": "Spruce St house with a dog and a grill",
+    "address": "Spruce St, Eastside, Riverside, CA",
+    "lat": 33.9805, "lng": -117.3460,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 2250, "rentShare": 750, "avgUtilities": 85,
+    "petsAllowed": true, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Three brothers and a golden retriever. We grill halal kebabs out back most weekends. Fifteen minutes to campus by bike.",
+    "contactEmail": "ucr-brothers-12@example.edu"
+  },
+
+  {
+    "title": "Regents Rd room, SuperLoop to campus",
+    "address": "Regents Rd, UTC, San Diego, CA",
+    "lat": 32.8640, "lng": -117.2270,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 4500, "rentShare": 1500, "avgUtilities": 100,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "The SuperLoop bus stops at the corner and has you at Geisel in about ten minutes. Three brothers in a quiet complex. We drive to Clairemont for halal groceries every couple of weeks.",
+    "contactEmail": "ucsd-brothers-01@example.edu"
+  },
+  {
+    "title": "Lebon Dr shared room for sisters",
+    "address": "Lebon Dr, UTC, San Diego, CA",
+    "lat": 32.8650, "lng": -117.2220,
+    "roomType": "SHARED", "totalRoommates": 4, "beds": 2, "baths": 2,
+    "totalRent": 3600, "rentShare": 900, "avgUtilities": 80,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Two sisters per room in a 2-bed, 2-bath. The trolley at UTC is a five-minute walk, and the mall food court has a halal spot for nights nobody cooks.",
+    "contactEmail": "ucsd-sisters-02@example.edu"
+  },
+  {
+    "title": "Nobel Dr 2-bed, own bathroom, near the trolley",
+    "address": "Nobel Dr, UTC, San Diego, CA",
+    "lat": 32.8680, "lng": -117.2190,
+    "roomType": "PRIVATE", "totalRoommates": 2, "beds": 2, "baths": 2,
+    "totalRent": 3700, "rentShare": 1850, "avgUtilities": 75,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "I'm a bioengineering grad student and I'm in lab most days. You'd get your own bathroom. The Blue Line to campus takes two stops.",
+    "contactEmail": "ucsd-sisters-03@example.edu"
+  },
+  {
+    "title": "Genesee Ave shared room, five brothers",
+    "address": "Genesee Ave, UTC, San Diego, CA",
+    "lat": 32.8640, "lng": -117.2140,
+    "roomType": "SHARED", "totalRoommates": 5, "beds": 3, "baths": 2,
+    "totalRent": 4400, "rentShare": 850, "avgUtilities": 120,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Cheapest way we know to live near UCSD. Five brothers, and we carpool to the masjid in Clairemont on Fridays. It's a shared room with a desk each.",
+    "contactEmail": "ucsd-brothers-04@example.edu"
+  },
+  {
+    "title": "Palmilla Dr 4-bed with a pool and a cat",
+    "address": "Palmilla Dr, UTC, San Diego, CA",
+    "lat": 32.8660, "lng": -117.2290,
+    "roomType": "PRIVATE", "totalRoommates": 4, "beds": 4, "baths": 2,
+    "totalRent": 6000, "rentShare": 1500, "avgUtilities": 130,
+    "petsAllowed": true, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "The complex pool is great after a long lab. There's one cat. Four brothers, all in Warren or Sixth. It's a 15-minute bike to campus, mostly downhill.",
+    "contactEmail": "ucsd-brothers-05@example.edu"
+  },
+  {
+    "title": "Charmant Dr room in a mixed grad apartment",
+    "address": "Charmant Dr, UTC, San Diego, CA",
+    "lat": 32.8650, "lng": -117.2250,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 4500, "rentShare": 1500, "avgUtilities": 95,
+    "petsAllowed": true, "halalKitchen": false, "genderPref": "ANY",
+    "description": "Three grad students, each in their own room, and the sisters have their own bathroom. The kitchen isn't halal-only, so bring your own pans. Shuttle to campus every 15 minutes.",
+    "contactEmail": "ucsd-mixed-06@example.edu"
+  },
+  {
+    "title": "Costa Verde shared room, sisters only",
+    "address": "Costa Verde Blvd, UTC, San Diego, CA",
+    "lat": 32.8700, "lng": -117.2210,
+    "roomType": "SHARED", "totalRoommates": 3, "beds": 2, "baths": 2,
+    "totalRent": 3300, "rentShare": 950, "avgUtilities": 70,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Gym and study room in the building. You'd share a room with a sister in Revelle. We wake each other up for suhoor in Ramadan.",
+    "contactEmail": "ucsd-sisters-07@example.edu"
+  },
+  {
+    "title": "Villa La Jolla 2-bed, walk to Price Center",
+    "address": "Villa La Jolla Dr, La Jolla, CA",
+    "lat": 32.8680, "lng": -117.2370,
+    "roomType": "PRIVATE", "totalRoommates": 2, "beds": 2, "baths": 1,
+    "totalRent": 3400, "rentShare": 1700, "avgUtilities": 65,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Price Center is a 15-minute walk. I'm a quiet third-year, usually at the library until Isha. It's one bathroom, but our schedules don't overlap.",
+    "contactEmail": "ucsd-brothers-08@example.edu"
+  },
+  {
+    "title": "La Jolla Scenic townhouse room for a sister",
+    "address": "La Jolla Scenic Dr N, La Jolla, CA",
+    "lat": 32.8770, "lng": -117.2450,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2.5,
+    "totalRent": 5100, "rentShare": 1700, "avgUtilities": 110,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Close enough to walk to Muir. Three sisters in a townhouse with a little garden where we pray Asr when the weather's nice, which is always.",
+    "contactEmail": "ucsd-sisters-09@example.edu"
+  },
+  {
+    "title": "Shared room near the Shores, sunset walks",
+    "address": "Avenida de la Playa, La Jolla Shores, CA",
+    "lat": 32.8540, "lng": -117.2560,
+    "roomType": "SHARED", "totalRoommates": 4, "beds": 2, "baths": 1,
+    "totalRent": 4000, "rentShare": 1000, "avgUtilities": 85,
+    "petsAllowed": true, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Four brothers, two blocks from the beach. We pray Maghrib on the sand when we can. You'll want a bike for the hill up to campus, about 15 minutes.",
+    "contactEmail": "ucsd-brothers-10@example.edu"
+  },
+  {
+    "title": "El Paseo Grande cottage, mixed, separate entrances",
+    "address": "El Paseo Grande, La Jolla Shores, CA",
+    "lat": 32.8580, "lng": -117.2550,
+    "roomType": "PRIVATE", "totalRoommates": 2, "beds": 2, "baths": 1,
+    "totalRent": 3800, "rentShare": 1900, "avgUtilities": 60,
+    "petsAllowed": true, "halalKitchen": false, "genderPref": "ANY",
+    "description": "Main house plus a back cottage with its own door. The current tenant is a sister in the main house. Shared kitchen, not halal-only. Close to Scripps Pier.",
+    "contactEmail": "ucsd-mixed-11@example.edu"
+  },
+  {
+    "title": "Governor Dr room for a sister, quiet street",
+    "address": "Governor Dr, University City, San Diego, CA",
+    "lat": 32.8530, "lng": -117.2170,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 3900, "rentShare": 1300, "avgUtilities": 90,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "A single-story house on a quiet street with lots of families. The bus to campus takes about 20 minutes. Our halal kitchen is stocked from the markets in Clairemont.",
+    "contactEmail": "ucsd-sisters-12@example.edu"
+  },
+
+  {
+    "title": "Turtle Rock 4-bed, brothers, big backyard",
+    "address": "Turtle Rock Dr, Turtle Rock, Irvine, CA",
+    "lat": 33.6330, "lng": -117.8180,
+    "roomType": "PRIVATE", "totalRoommates": 4, "beds": 4, "baths": 3,
+    "totalRent": 5200, "rentShare": 1300, "avgUtilities": 130,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Four brothers in a house with a real backyard. We drive to the Islamic Center of Irvine for Jumu'ah, about ten minutes. Bike to campus in 15.",
+    "contactEmail": "uci-brothers-01@example.edu"
+  },
+  {
+    "title": "Sandburg Way shared room for sisters",
+    "address": "Sandburg Way, Turtle Rock, Irvine, CA",
+    "lat": 33.6390, "lng": -117.8230,
+    "roomType": "SHARED", "totalRoommates": 4, "beds": 2, "baths": 2,
+    "totalRent": 3600, "rentShare": 900, "avgUtilities": 85,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Two sisters per room in a quiet townhouse. The Anteater Express shuttle stop is a short walk. In Ramadan we host iftar for the MSA sisters on Fridays.",
+    "contactEmail": "uci-sisters-02@example.edu"
+  },
+  {
+    "title": "Culver Dr room with a sister and two cats",
+    "address": "Culver Dr, University Park, Irvine, CA",
+    "lat": 33.6560, "lng": -117.8240,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 3900, "rentShare": 1300, "avgUtilities": 95,
+    "petsAllowed": true, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Two cats, two sisters, one open room. The Mason Park trail is behind us for walks after Asr. Campus is a 15-minute bike along the San Diego Creek path.",
+    "contactEmail": "uci-sisters-03@example.edu"
+  },
+  {
+    "title": "Harvard Ave shared room, five brothers",
+    "address": "Harvard Ave, University Park, Irvine, CA",
+    "lat": 33.6610, "lng": -117.8330,
+    "roomType": "SHARED", "totalRoommates": 5, "beds": 3, "baths": 2,
+    "totalRent": 4300, "rentShare": 800, "avgUtilities": 110,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Mostly engineering transfers. We have a group chat just for Fajr wake-ups. Shared room, $800, and the bus is right outside.",
+    "contactEmail": "uci-brothers-04@example.edu"
+  },
+  {
+    "title": "Own bathroom in a 2-bed near Rancho San Joaquin",
+    "address": "University Dr, Rancho San Joaquin, Irvine, CA",
+    "lat": 33.6500, "lng": -117.8330,
+    "roomType": "PRIVATE", "totalRoommates": 2, "beds": 2, "baths": 2,
+    "totalRent": 3300, "rentShare": 1650, "avgUtilities": 70,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Two-bed, two-bath, a ten-minute walk to Aldrich Park. I'm a law student, so it's quiet here. There's a halal grill nearby for nights neither of us cooks.",
+    "contactEmail": "uci-brothers-05@example.edu"
+  },
+  {
+    "title": "Campus Dr room in a mixed apartment, own lock",
+    "address": "Campus Dr, Irvine, CA",
+    "lat": 33.6560, "lng": -117.8470,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 3900, "rentShare": 1300, "avgUtilities": 90,
+    "petsAllowed": false, "halalKitchen": false, "genderPref": "ANY",
+    "description": "Across from campus, so you can walk to an 8am in ten minutes. A brother and a sister live here now, each with their own bathroom. The kitchen isn't halal-only.",
+    "contactEmail": "uci-mixed-06@example.edu"
+  },
+  {
+    "title": "Bonita Canyon shared room, dog-friendly",
+    "address": "Bonita Canyon Dr, Turtle Rock, Irvine, CA",
+    "lat": 33.6280, "lng": -117.8350,
+    "roomType": "SHARED", "totalRoommates": 3, "beds": 2, "baths": 1,
+    "totalRent": 3000, "rentShare": 850, "avgUtilities": 60,
+    "petsAllowed": true, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Shared room with a nursing student. Our third roommate has a small, quiet dog. The bike trail gets you to campus in about 12 minutes.",
+    "contactEmail": "uci-sisters-07@example.edu"
+  },
+  {
+    "title": "Eastbluff room with a view of the Back Bay",
+    "address": "Eastbluff Dr, Eastbluff, Newport Beach, CA",
+    "lat": 33.6370, "lng": -117.8590,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 4200, "rentShare": 1400, "avgUtilities": 100,
+    "petsAllowed": true, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "We run the Back Bay loop after Fajr. Three brothers and a lazy cat. It's a 15-minute bike to campus across Jamboree.",
+    "contactEmail": "uci-brothers-08@example.edu"
+  },
+  {
+    "title": "Vista del Oro 2-bed for a sister",
+    "address": "Vista del Oro, Eastbluff, Newport Beach, CA",
+    "lat": 33.6340, "lng": -117.8640,
+    "roomType": "PRIVATE", "totalRoommates": 2, "beds": 2, "baths": 1.5,
+    "totalRent": 3200, "rentShare": 1600, "avgUtilities": 65,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "I'm a public health senior who's up early for Fajr and asleep by 11. Quiet complex with lots of trees. About a 20-minute bike to campus.",
+    "contactEmail": "uci-sisters-09@example.edu"
+  },
+  {
+    "title": "Ford Rd shared room, four brothers",
+    "address": "Ford Rd, Bonita Canyon, Newport Beach, CA",
+    "lat": 33.6270, "lng": -117.8550,
+    "roomType": "SHARED", "totalRoommates": 4, "beds": 2, "baths": 2,
+    "totalRent": 3400, "rentShare": 850, "avgUtilities": 80,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Two brothers per room, each room with its own bathroom. Someone always has the car for Costco and halal meat runs. Campus is a 15-minute bike.",
+    "contactEmail": "uci-brothers-10@example.edu"
+  },
+  {
+    "title": "Shady Canyon townhouse, mixed grad students",
+    "address": "Shady Canyon Dr, Turtle Rock, Irvine, CA",
+    "lat": 33.6250, "lng": -117.8130,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2.5,
+    "totalRent": 4500, "rentShare": 1500, "avgUtilities": 115,
+    "petsAllowed": true, "halalKitchen": false, "genderPref": "ANY",
+    "description": "Three PhD students in a townhouse, and the sisters' room has its own bathroom. The shared kitchen isn't halal-only. It's quiet, near the hiking trails, and 20 minutes to campus by bike.",
+    "contactEmail": "uci-mixed-11@example.edu"
+  },
+  {
+    "title": "Bison Ave sisters' apartment by the bike path",
+    "address": "Bison Ave, Newport Beach, CA",
+    "lat": 33.6450, "lng": -117.8640,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 3900, "rentShare": 1300, "avgUtilities": 95,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "The bike path takes you straight to campus in ten minutes. Three sisters, a halal kitchen, and Sunday brunch is a house rule.",
+    "contactEmail": "uci-sisters-12@example.edu"
   }
 ]
