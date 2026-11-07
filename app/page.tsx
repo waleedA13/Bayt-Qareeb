@@ -29,8 +29,12 @@ const HOUSE = {
 };
 const BADGE = "rounded-md px-2 py-0.5 text-[13px] font-semibold";
 const START_BOUNDS: [[number, number], [number, number]] = [[-122.6, 33.8], [-117.9, 38.1]];
-const PRICES = [800, 1000, 1250, 1500, 2000];
+// Price range filter bounds (monthly rent share). A handle at either end means "no limit".
+const PRICE_FLOOR = 0;
+const PRICE_CEIL = 3000;
+const PRICE_STEP = 50;
 
+const isSentence = (t: string) => t.trim().split(/\s+/).length >= 3;
 const usd = (n: number) => `$${n.toLocaleString()}`;
 const short = (n: number) => (n >= 1000 ? `$${(n / 1000).toFixed(n % 1000 ? 1 : 0)}K` : `$${n}`);
 // Satellite view of the listing's block, used as the card image until listings have photos.
@@ -81,6 +85,7 @@ export default function Home() {
   // Filters
   const [query, setQuery] = useState("");
   const [house, setHouse] = useState<House>("ALL");
+  const [minPrice, setMinPrice] = useState<number | null>(null);
   const [maxPrice, setMaxPrice] = useState<number | null>(null);
   const [privateOnly, setPrivateOnly] = useState(false);
   const [halalOnly, setHalalOnly] = useState(false);
@@ -109,13 +114,16 @@ export default function Home() {
     return () => window.removeEventListener("keydown", onKey);
   }, [selected]);
 
-  const activeFilters = [house !== "ALL", maxPrice != null, privateOnly, halalOnly, petsOnly].filter(Boolean).length;
+  const activeFilters = [house !== "ALL", minPrice != null || maxPrice != null, privateOnly, halalOnly, petsOnly].filter(Boolean).length;
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    // A full sentence ("sisters room near UCLA") is for the AI search on Enter, so only short
+    // text (a campus, street or city) filters as you type.
+    const q = isSentence(query) ? "" : query.trim().toLowerCase();
     const out = listings.filter((l) =>
       (!q || l.title.toLowerCase().includes(q) || l.address.toLowerCase().includes(q)) &&
       (house === "ALL" || l.genderPref === house) &&
+      (minPrice == null || l.rentShare >= minPrice) &&
       (maxPrice == null || l.rentShare <= maxPrice) &&
       (!privateOnly || l.roomType === "PRIVATE") &&
       (!halalOnly || l.halalKitchen) &&
@@ -126,7 +134,7 @@ export default function Home() {
       sort === "price-desc" ? b.rentShare - a.rentShare :
       a.totalRoommates - b.totalRoommates
     );
-  }, [listings, query, house, maxPrice, privateOnly, halalOnly, petsOnly, sort]);
+  }, [listings, query, house, minPrice, maxPrice, privateOnly, halalOnly, petsOnly, sort]);
 
   const inView = useMemo(() => {
     if (!bounds) return filtered;
@@ -144,14 +152,14 @@ export default function Home() {
   };
 
   const clearFilters = () => {
-    setQuery(""); setHouse("ALL"); setMaxPrice(null);
+    setQuery(""); setHouse("ALL"); setMinPrice(null); setMaxPrice(null);
     setPrivateOnly(false); setHalalOnly(false); setPetsOnly(false); setAiNote("");
   };
 
   async function askAi(e: React.FormEvent) {
     e.preventDefault();
     const text = query.trim();
-    if (text.split(/\s+/).length < 3) return; // short input already filters as you type
+    if (!isSentence(text)) return; // short input already filters as you type
     setAsking(true); setAiNote("");
     try {
       const res = await fetch("/api/search", {
@@ -161,6 +169,7 @@ export default function Home() {
       if (!res.ok) throw new Error(data.error || "Search failed");
       const f = data.filters ?? {};
       setHouse(f.genderPref ?? "ALL");
+      setMinPrice(null);
       setMaxPrice(f.maxRent ?? null);
       setPrivateOnly(f.roomType === "PRIVATE");
       setHalalOnly(f.halalKitchen === true);
@@ -270,7 +279,7 @@ export default function Home() {
           </label>
           <button
             type="submit"
-            disabled={asking || query.trim().split(/\s+/).length < 3}
+            disabled={asking || !isSentence(query)}
             title="Describe what you want and press Enter"
             className="flex h-11 shrink-0 items-center gap-1.5 rounded-xl bg-ink px-3 text-sm font-semibold text-white transition hover:bg-ink/90 disabled:bg-ink/25"
           >
@@ -291,13 +300,10 @@ export default function Home() {
             value={house}
             onChange={(v) => setHouse(v as House)}
           />
-          <Dropdown
-            icon={Icon.dollar}
-            label={maxPrice == null ? "Price" : `Up to ${usd(maxPrice)}`}
-            active={maxPrice != null}
-            options={[["", "Any price"], ...PRICES.map((p) => [String(p), `Up to ${usd(p)}`] as [string, string])]}
-            value={maxPrice == null ? "" : String(maxPrice)}
-            onChange={(v) => setMaxPrice(v ? Number(v) : null)}
+          <PriceFilter
+            min={minPrice}
+            max={maxPrice}
+            onChange={(lo, hi) => { setMinPrice(lo); setMaxPrice(hi); }}
           />
           <Pill icon={Icon.door} on={privateOnly} onClick={() => setPrivateOnly((v) => !v)}>Private room</Pill>
           <Pill icon={Icon.bowl} on={halalOnly} onClick={() => setHalalOnly((v) => !v)}>Halal kitchen</Pill>
@@ -309,6 +315,11 @@ export default function Home() {
           )}
         </div>
 
+        {!aiNote && !asking && isSentence(query) && (
+          <p className="glass pointer-events-auto self-start rounded-full px-3 py-1.5 text-sm font-medium">
+            Press <kbd className="rounded bg-ink/10 px-1.5 font-sans">Enter</kbd> to search with AI
+          </p>
+        )}
         {aiNote && (
           <p role="status" className="glass pointer-events-auto self-start rounded-full px-3 py-1.5 text-sm font-medium">
             {aiNote}
@@ -664,5 +675,137 @@ function Lister({ email }: { email: string }) {
       <span className="grid h-7 w-7 place-items-center rounded-full bg-paper font-semibold uppercase">{email[0]}</span>
       <span className="min-w-0 truncate text-ink/70">Verified at <b className="text-ink">{domain}</b></span>
     </p>
+  );
+}
+
+const clampPrice = (n: number) => Math.min(PRICE_CEIL, Math.max(PRICE_FLOOR, Math.round(n / PRICE_STEP) * PRICE_STEP));
+
+// Min/max price: a two-handle slider plus number inputs, in a glass popover like the other filters.
+function PriceFilter({ min, max, onChange }: { min: number | null; max: number | null; onChange: (min: number | null, max: number | null) => void }) {
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const ref = useRef<HTMLDivElement>(null);
+  const lo = min ?? PRICE_FLOOR;
+  const hi = max ?? PRICE_CEIL;
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent | KeyboardEvent) => {
+      if (e instanceof KeyboardEvent ? e.key === "Escape" : !ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", close);
+    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", close); };
+  }, [open]);
+
+  // Ends of the slider mean "no limit" so the filter turns itself off.
+  const set = (nextLo: number, nextHi: number) => {
+    const a = clampPrice(Math.min(nextLo, nextHi));
+    const b = clampPrice(Math.max(nextLo, nextHi));
+    onChange(a <= PRICE_FLOOR ? null : a, b >= PRICE_CEIL ? null : b);
+  };
+
+  const label =
+    min == null && max == null ? "Price" :
+    min == null ? `Up to ${usd(max!)}` :
+    max == null ? `${usd(min)}+` : `${usd(min)} – ${usd(max)}`;
+  const pct = (n: number) => ((n - PRICE_FLOOR) / (PRICE_CEIL - PRICE_FLOOR)) * 100;
+
+  return (
+    <div ref={ref} className="shrink-0">
+      <button
+        type="button"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        onClick={(e) => {
+          const r = e.currentTarget.getBoundingClientRect();
+          setPos({ top: r.bottom + 6, left: Math.max(12, Math.min(r.left, window.innerWidth - 312)) });
+          setOpen((o) => !o);
+        }}
+        className={`flex h-11 items-center gap-1.5 rounded-full pl-4 pr-3 text-sm font-semibold shadow-[0_4px_14px_rgba(20,33,61,0.12)] transition-colors md:h-10 [@media(pointer:coarse)]:h-11 ${
+          min != null || max != null ? "bg-ink text-white" : "glass hover:bg-white"
+        }`}
+      >
+        <Svg d={Icon.dollar} />
+        {label}
+        <Svg d={Icon.chevron} className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div
+          role="dialog"
+          aria-label="Price range"
+          style={{ top: pos.top, left: pos.left }}
+          className="glass fixed z-[60] w-[300px] rounded-2xl p-4 shadow-[0_16px_40px_rgba(20,33,61,0.22)] motion-safe:animate-fade-up"
+        >
+          <p className="text-sm font-semibold">Your monthly rent share</p>
+
+          {/* Two range inputs stacked on one track; only their thumbs take pointer input. */}
+          <div className="relative mt-4 h-11">
+            <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-ink/15" />
+            <div
+              className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-ink"
+              style={{ left: `${pct(lo)}%`, right: `${100 - pct(hi)}%` }}
+            />
+            <input
+              type="range" aria-label="Minimum price"
+              min={PRICE_FLOOR} max={PRICE_CEIL} step={PRICE_STEP} value={lo}
+              onChange={(e) => set(Math.min(Number(e.target.value), hi - PRICE_STEP), hi)}
+              className="range-dual"
+            />
+            <input
+              type="range" aria-label="Maximum price"
+              min={PRICE_FLOOR} max={PRICE_CEIL} step={PRICE_STEP} value={hi}
+              onChange={(e) => set(lo, Math.max(Number(e.target.value), lo + PRICE_STEP))}
+              className="range-dual"
+            />
+          </div>
+
+          <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-end gap-2">
+            <PriceInput label="Min" value={min} placeholder="No min" onCommit={(v) => set(v ?? PRICE_FLOOR, hi)} />
+            <span className="pb-3 text-ink/50">–</span>
+            <PriceInput label="Max" value={max} placeholder="No max" onCommit={(v) => set(lo, v ?? PRICE_CEIL)} />
+          </div>
+
+          <div className="mt-4 flex items-center justify-between">
+            <button type="button" onClick={() => onChange(null, null)} className="min-h-[44px] px-1 text-sm font-semibold underline-offset-2 hover:underline">
+              Reset
+            </button>
+            <button type="button" onClick={() => setOpen(false)} className="min-h-[44px] rounded-xl bg-ink px-5 text-sm font-semibold text-white hover:bg-ink/90">
+              Done
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Number box that lets you type freely and applies on blur or Enter (so "1" doesn't snap mid-typing).
+function PriceInput({ label, value, placeholder, onCommit }: {
+  label: string; value: number | null; placeholder: string; onCommit: (v: number | null) => void;
+}) {
+  const [draft, setDraft] = useState(value == null ? "" : String(value));
+  useEffect(() => { setDraft(value == null ? "" : String(value)); }, [value]);
+  const commit = () => {
+    const n = Number(draft.replace(/[^0-9]/g, ""));
+    onCommit(draft.trim() === "" || !Number.isFinite(n) ? null : n);
+  };
+  return (
+    <label className="block">
+      <span className="text-xs font-medium text-ink/70">{label}</span>
+      <span className="relative mt-1 block">
+        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-ink/60">$</span>
+        <input
+          inputMode="numeric"
+          value={draft}
+          placeholder={placeholder}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={commit}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } }}
+          className="h-11 w-full rounded-xl bg-white pl-6 pr-2 text-[15px] font-semibold outline-none ring-1 ring-ink/15 placeholder:font-normal placeholder:text-ink/50 focus:ring-2 focus:ring-ink/40"
+        />
+      </span>
+    </label>
   );
 }
