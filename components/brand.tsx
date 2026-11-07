@@ -17,12 +17,48 @@ export function Star({ className = "" }: { className?: string }) {
   );
 }
 
+// The Bayt Qareeb mark: a gold roofline (with chimney) under a crescent and star, on a navy tile.
+// Drawn as SVG so it stays crisp from the 32px browser tab up to the landing page.
+export function LogoMark({ className = "h-10 w-10" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 64 64" role="img" aria-label="Bayt Qareeb" className={className}>
+      <defs>
+        <linearGradient id="bq-bg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#1C3B66" />
+          <stop offset="1" stopColor="#0F1E3A" />
+        </linearGradient>
+        <linearGradient id="bq-gold" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#F6E3A8" />
+          <stop offset="1" stopColor="#D4AE58" />
+        </linearGradient>
+        <linearGradient id="bq-wall" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#E9CF86" />
+          <stop offset="1" stopColor="#7FA3D1" stopOpacity="0" />
+        </linearGradient>
+        <radialGradient id="bq-glow" cx="0.5" cy="0.15" r="0.8">
+          <stop offset="0" stopColor="#6E9BD6" stopOpacity="0.55" />
+          <stop offset="1" stopColor="#6E9BD6" stopOpacity="0" />
+        </radialGradient>
+        <mask id="bq-crescent">
+          <circle cx="30" cy="11" r="5" fill="#fff" />
+          <circle cx="32.4" cy="9.4" r="4.4" fill="#000" />
+        </mask>
+      </defs>
+      <rect width="64" height="64" rx="15" fill="url(#bq-bg)" />
+      <path d="M17 35 L32 22 L47 35 V55 H17 Z" fill="url(#bq-glow)" />
+      <path d="M17 35 V55 M47 35 V55" stroke="url(#bq-wall)" strokeWidth="3.4" />
+      <path d="M40.5 27.5 V19.5 H45 V31.5" fill="url(#bq-gold)" />
+      <path d="M11 37.5 L32 19.5 L53 37.5" fill="none" stroke="url(#bq-gold)" strokeWidth="4.6" strokeLinejoin="miter" />
+      <circle cx="30" cy="11" r="5" fill="url(#bq-gold)" mask="url(#bq-crescent)" />
+      <path fill="#F6E3A8" d="M36.6 6.8l.6 1.3 1.4.1-1.1.9.4 1.4-1.3-.8-1.2.8.4-1.4-1.1-.9 1.4-.1z" />
+    </svg>
+  );
+}
+
 export function Logo() {
   return (
     <Link href="/" className="flex shrink-0 items-center gap-2.5 rounded-xl outline-none focus-visible:ring-4 focus-visible:ring-ink/25">
-      <span className="grid h-10 w-10 place-items-center rounded-xl bg-ink">
-        <Star className="h-5 w-5 text-white" />
-      </span>
+      <LogoMark className="h-10 w-10 shrink-0" />
       <span className="font-display text-xl font-bold tracking-tight">Bayt Qareeb</span>
     </Link>
   );

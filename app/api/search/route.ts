@@ -16,6 +16,7 @@ const SCHEMA = {
     maxRent: { type: "number", description: "Max monthly rent share in USD" },
     genderPref: { type: "string", enum: ["BROTHERS", "SISTERS", "ANY"] },
     roomType: { type: "string", enum: ["PRIVATE", "SHARED"] },
+    propertyType: { type: "string", enum: ["HOUSE", "APARTMENT", "CONDO", "TOWNHOUSE"] },
     petsAllowed: { type: "boolean" },
     halalKitchen: { type: "boolean" },
     nearText: { type: "string", description: "Place, campus, city or street the user wants to be near" },
@@ -26,6 +27,7 @@ const SCHEMA = {
 const SYSTEM =
   "Convert a student's roommate-listing search into filters. Only set a field when the query clearly asks for it; omit everything else. " +
   "maxRent is the user's own monthly share in USD. genderPref: BROTHERS for men/brothers-only, SISTERS for women/sisters-only. " +
+  "propertyType: HOUSE, APARTMENT (also 'apt', 'flat'), CONDO or TOWNHOUSE (also 'townhome'), only if the home type is named. " +
   "nearText is a short place name copied from the query (e.g. 'UCLA', 'Berkeley').";
 
 export async function POST(req: Request) {
@@ -63,6 +65,7 @@ export async function POST(req: Request) {
   if (filters.maxRent !== undefined) where.rentShare = { lte: filters.maxRent };
   if (filters.genderPref) where.genderPref = filters.genderPref;
   if (filters.roomType) where.roomType = filters.roomType;
+  if (filters.propertyType) where.propertyType = filters.propertyType;
   if (filters.petsAllowed !== undefined) where.petsAllowed = filters.petsAllowed;
   if (filters.halalKitchen !== undefined) where.halalKitchen = filters.halalKitchen;
   // shortcut: substring match on address/title, not geo distance; upgrade to geocoding + radius if needed

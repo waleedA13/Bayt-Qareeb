@@ -19,8 +19,14 @@ function validate(listings) {
     }
     if (l.rentShare > l.totalRent) errors.push(`${tag}: rentShare exceeds totalRent`);
     if (l.totalRoommates < l.beds) errors.push(`${tag}: fewer roommates than beds`);
+    if (!["HOUSE", "APARTMENT", "CONDO", "TOWNHOUSE"].includes(l.propertyType)) errors.push(`${tag}: bad propertyType`);
     if (!["PRIVATE", "SHARED"].includes(l.roomType)) errors.push(`${tag}: bad roomType`);
     if (!["BROTHERS", "SISTERS", "ANY"].includes(l.genderPref)) errors.push(`${tag}: bad genderPref`);
+    if (l.photos !== undefined) {
+      if (!Array.isArray(l.photos)) errors.push(`${tag}: photos must be an array`);
+      else if (l.photos.length > 8) errors.push(`${tag}: more than 8 photos`);
+      else if (l.photos.some((u) => typeof u !== "string" || !/^https:\/\//.test(u))) errors.push(`${tag}: photos must be https URLs`);
+    }
     // Seed contacts must be fake so no real student gets emailed.
     if (!/^[^\s@]+@example\.edu$/i.test(l.contactEmail ?? "")) errors.push(`${tag}: contactEmail must end in @example.edu`);
     const key = String(l.title ?? "").trim().toLowerCase();

@@ -25,6 +25,7 @@ model Listing {
   lat          Float
   lng          Float
   // Room setup
+  propertyType String   @default("APARTMENT") // HOUSE | APARTMENT | CONDO | TOWNHOUSE
   roomType     String // PRIVATE | SHARED
   // Capacity
   totalRoommates Int
@@ -39,6 +40,8 @@ model Listing {
   halalKitchen Boolean  @default(true)
   genderPref   String // BROTHERS | SISTERS | ANY
   description  String?
+  // Photo tour: exterior first, then rooms. Empty means the UI falls back to a satellite view.
+  photos       String[] @default([])
   contactEmail String
   createdAt    DateTime @default(now())
   ownerId      String?

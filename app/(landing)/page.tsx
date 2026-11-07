@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
-import { Logo, MapBackdrop, Star, staticMap } from "@/components/brand";
+import { Logo, LogoMark, MapBackdrop, Star, staticMap } from "@/components/brand";
 
 // Public landing page. Signed-out visitors only ever see the static sample rooms below, never real listings.
 
@@ -96,7 +96,7 @@ export default async function Landing() {
           {/* A still of the map app: command bar, price pins and a room card */}
           <div aria-hidden="true" className="relative mx-auto h-[360px] w-full max-w-[520px] motion-safe:animate-fade-up sm:h-[420px]" style={{ animationDelay: "120ms" }}>
             <div className="glass absolute inset-x-0 top-0 flex h-14 items-center gap-2 rounded-2xl pl-2 pr-3 shadow-[0_10px_30px_rgba(20,33,61,0.18)]">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-ink"><Star className="h-5 w-5 text-white" /></span>
+              <LogoMark className="h-10 w-10 shrink-0" />
               <span className="truncate pl-1 text-[15px] text-ink/80">Sisters&apos; room near UCI with a halal kitchen</span>
               <span className="ml-auto grid h-9 w-9 shrink-0 place-items-center rounded-full bg-lantern">
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" /></svg>
