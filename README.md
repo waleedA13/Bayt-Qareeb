@@ -6,24 +6,24 @@
 
 ![Bayt Qareeb map with a listing open](docs/screenshot.jpg)
 
-**🔗 Live demo:** https://manara-west.vercel.app (sign in with a `.edu` email, see [Testing the app](#-testing-the-app-judges-start-here))
+**🔗 Live demo:** https://manara-west.vercel.app (landing page, then sign up with a `.edu` email to open the map at `/map`, see [Testing the app](#-testing-the-app-judges-start-here))
 
 ---
 
 ## ⚡ Testing the app (judges, start here)
 
-### 🛡️ Why you'll see a sign-in screen first
-Bayt Qareeb has a strict **anti-creep gate**: only **verified `.edu` students** can see the map and listings. This keeps out scammers and strangers posing as roommates, and it protects the students whose contact details are on each listing.
+### 🛡️ Why the map needs a sign-in
+The landing page at `/` is public, but Bayt Qareeb has a strict **anti-creep gate**: only **verified `.edu` students** can see the map (`/map`) and listings. This keeps out scammers and strangers posing as roommates, and it protects the students whose contact details are on each listing.
 
 - Sign-in uses **Clerk** with an emailed one-time code, which proves you own the inbox.
 - After sign-in, the app checks that your **verified primary email ends in `.edu`** (`lib/auth.ts`).
 - Anyone else gets a **"Students only"** screen, and `/api/listings` returns **403**.
 
 ### ✅ Option A: use your own `.edu` email (recommended)
-1. Open **https://manara-west.vercel.app**
+1. Open **https://manara-west.vercel.app** and click **Browse rooms** (or **Sign in** if you already have an account)
 2. Enter your school email, e.g. `you@yourschool.edu`
 3. Enter the 6-digit code from your inbox
-4. You're in: the map and listings load
+4. You're in: you land on `/map` and the listings load
 
 ### 🧪 Option B: test email, no inbox needed
 Our Clerk instance is in development mode, which supports [Clerk test emails](https://clerk.com/docs/testing/test-emails-and-phones):
@@ -36,11 +36,12 @@ Our Clerk instance is in development mode, which supports [Clerk test emails](ht
 > Any address containing `+clerk_test` works; no email is sent. If this doesn't work, test mode is off in the Clerk dashboard (**Configure → Settings → Test mode**), so use Option A.
 
 ### 🗺️ 60-second demo path
-1. On the map, tap the **dot near Los Angeles**. The map flies in and price tags appear.
-2. Tap the **$1.4K** pin (near UCLA). The details panel opens.
-3. Check what generic listing sites don't show: **Brothers house**, **Halal kitchen**, **your share ($1,400) vs. the whole apartment ($4,200)**, and average utilities.
-4. Use the filters: **Sisters**, **Halal kitchen**, **Up to $800**. The list and map update together.
-5. Resize to phone width: you get a list/map toggle and a preview card when you tap a pin.
+1. On the landing page (`/`), click **Browse rooms**, sign up, and you land on the map at `/map`.
+2. On the map, tap the **dot near Los Angeles**. The map flies in and price tags appear.
+3. Tap the **$1.5K** pin on Glenrock Ave (Westwood, near UCLA). The details panel opens.
+4. Check what generic listing sites don't show: **Brothers house**, **Halal kitchen**, **your share ($1,500) vs. the whole apartment ($4,500)**, and average utilities.
+5. Use the filters: **Sisters**, **Halal kitchen**, **Up to $800**. The list and map update together.
+6. Resize to phone width: you get a list/map toggle and a preview card when you tap a pin.
 
 ---
 
@@ -88,7 +89,7 @@ cp .env.example .env
 npx prisma db push
 ```
 
-**4. Load the demo listings** (Berkeley, UCLA and USC)
+**4. Load the demo listings** (60 rooms around UCLA, USC, UC Riverside, UCSD and UC Irvine; contacts are fake `@example.edu` addresses). This deletes existing listings first.
 ```bash
 npm run seed
 ```
@@ -98,7 +99,7 @@ npm run seed
 npm run dev
 ```
 
-Open **http://localhost:3000** and sign in with a `.edu` email.
+Open **http://localhost:3000** for the landing page, then sign in with a `.edu` email to reach `/map`.
 
 | Command | What it does |
 |---|---|
