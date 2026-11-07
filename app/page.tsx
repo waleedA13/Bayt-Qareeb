@@ -3,10 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Map, { Marker, NavigationControl, type MapRef } from "react-map-gl";
 import { UserButton } from "@clerk/nextjs";
-import SearchBar from "@/components/SearchBar";
 
-// Zillow-style layout: search + filter bar on top, map on the left, scrollable
-// listing cards on the right. Same data, same stack (Next + react-map-gl + Tailwind).
+// Full-bleed map with frosted-glass UI floating on top (search + filter pills, results panel),
+// two base colors (white + navy ink) and one accent (gold) for the active pin and "Contact lister".
 
 type Listing = {
   id: string; title: string; address: string; lat: number; lng: number;
@@ -18,28 +17,52 @@ type Listing = {
 
 type Bounds = { w: number; s: number; e: number; n: number } | null;
 type Sort = "price-asc" | "price-desc" | "roommates";
+type House = "ALL" | Listing["genderPref"];
 
 const TOKEN = process.env.NEXT_MAPBOX_TOKEN;
 const PIN_ZOOM = 10;
 
-// Two base colors (white + navy ink) do the work; gold is reserved for the active pin and "Contact lister".
 const HOUSE = {
   BROTHERS: { label: "Brothers", cls: "bg-white text-brothers ring-1 ring-brothers/25" },
   SISTERS: { label: "Sisters", cls: "bg-white text-sisters ring-1 ring-sisters/25" },
   ANY: { label: "Mixed", cls: "bg-white text-ink ring-1 ring-ink/20" },
 };
 const BADGE = "rounded-md px-2 py-0.5 text-[13px] font-semibold";
-// Listings span the Bay Area to LA; start framed on them instead of the whole state.
 const START_BOUNDS: [[number, number], [number, number]] = [[-122.6, 33.8], [-117.9, 38.1]];
+const PRICES = [800, 1000, 1250, 1500, 2000];
 
 const usd = (n: number) => `$${n.toLocaleString()}`;
 const short = (n: number) => (n >= 1000 ? `$${(n / 1000).toFixed(n % 1000 ? 1 : 0)}K` : `$${n}`);
+// Satellite view of the listing's block, used as the card image until listings have photos.
+const snapshot = (l: Listing, w: number, h: number) =>
+  `https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v12/static/pin-l+e9b949(${l.lng},${l.lat})/${l.lng},${l.lat},16.2,0/${w}x${h}@2x?logo=false&attribution=false&access_token=${TOKEN}`;
 
 // Eight-point star (Rub el Hizb), the Bayt Qareeb mark.
 function Star({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
       <path fill="currentColor" d="M12 1l2.6 4.4L19.8 4.2 18.6 9.4 23 12l-4.4 2.6 1.2 5.2-5.2-1.2L12 23l-2.6-4.4-5.2 1.2 1.2-5.2L1 12l4.4-2.6L4.2 4.2l5.2 1.2z" />
+    </svg>
+  );
+}
+
+const Icon = {
+  search: <path d="M11 4a7 7 0 100 14 7 7 0 000-14zM20 20l-3.5-3.5" />,
+  spark: <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z" />,
+  home: <path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z" />,
+  dollar: <path d="M12 3v18M16.5 7.5C16 6 14.3 5 12 5s-4.5 1.2-4.5 3.2c0 4.6 9 2.4 9 7 0 2-2 3.3-4.5 3.3s-4.3-1.1-4.8-2.7" />,
+  door: <path d="M6 21V4h12v17M3 21h18M14.5 12.5h.01" />,
+  bowl: <path d="M3 11h18a9 9 0 01-18 0zM8 7c0-1.5 1-1.5 1-3M12 7c0-1.5 1-1.5 1-3M16 7c0-1.5 1-1.5 1-3" />,
+  paw: <path d="M12 13c-3 0-5.5 3.2-5.5 5.2 0 1.5 1.3 1.8 2.6 1.8 1.2 0 1.9-.6 2.9-.6s1.7.6 2.9.6c1.3 0 2.6-.3 2.6-1.8 0-2-2.5-5.2-5.5-5.2zM6 9.5a1.6 2 0 110 .01M18 9.5a1.6 2 0 110 .01M9.5 5.5a1.6 2 0 110 .01M14.5 5.5a1.6 2 0 110 .01" />,
+  chevron: <path d="M6 9l6 6 6-6" />,
+  check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
+  sort: <path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4" />,
+  close: <path d="M6 6l12 12M18 6L6 18" />,
+};
+function Svg({ d, className = "h-4 w-4" }: { d: React.ReactNode; className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {d}
     </svg>
   );
 }
@@ -52,18 +75,20 @@ export default function Home() {
   const [showPrices, setShowPrices] = useState(false);
   const [bounds, setBounds] = useState<Bounds>(null);
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
-  // Mobile map: tapping a pin shows a small preview card first (like Zillow), tap it for details.
   const [preview, setPreview] = useState<Listing | null>(null);
   const isDesktop = () => typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
 
   // Filters
   const [query, setQuery] = useState("");
-  const [house, setHouse] = useState<"ALL" | Listing["genderPref"]>("ALL");
+  const [house, setHouse] = useState<House>("ALL");
   const [maxPrice, setMaxPrice] = useState<number | null>(null);
   const [privateOnly, setPrivateOnly] = useState(false);
   const [halalOnly, setHalalOnly] = useState(false);
   const [petsOnly, setPetsOnly] = useState(false);
   const [sort, setSort] = useState<Sort>("price-asc");
+  // AI search: Enter sends the sentence to /api/search, which turns it into the same filters.
+  const [asking, setAsking] = useState(false);
+  const [aiNote, setAiNote] = useState("");
 
   const headingRef = useRef<HTMLHeadingElement>(null);
   const mapRef = useRef<MapRef>(null);
@@ -103,7 +128,6 @@ export default function Home() {
     );
   }, [listings, query, house, maxPrice, privateOnly, halalOnly, petsOnly, sort]);
 
-  // Like Zillow: the list shows what's in the current map view.
   const inView = useMemo(() => {
     if (!bounds) return filtered;
     return filtered.filter((l) => l.lng >= bounds.w && l.lng <= bounds.e && l.lat >= bounds.s && l.lat <= bounds.n);
@@ -121,438 +145,491 @@ export default function Home() {
 
   const clearFilters = () => {
     setQuery(""); setHouse("ALL"); setMaxPrice(null);
-    setPrivateOnly(false); setHalalOnly(false); setPetsOnly(false);
+    setPrivateOnly(false); setHalalOnly(false); setPetsOnly(false); setAiNote("");
   };
 
-  return (
-    <main className="flex h-dvh w-screen flex-col overflow-clip bg-white text-ink">
-      {/* Top bar */}
-      <header className="z-30 border-b border-ink/10 bg-white">
-        <div className="flex items-center gap-3 px-4 py-2.5 sm:gap-4 sm:px-6 sm:py-3">
-          <div className="flex shrink-0 items-center gap-2">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-ink">
-              <Star className="h-5 w-5 text-white" />
-            </span>
-            <span className="hidden font-display text-xl font-bold tracking-wide sm:block">Bayt Qareeb</span>
-          </div>
+  async function askAi(e: React.FormEvent) {
+    e.preventDefault();
+    const text = query.trim();
+    if (text.split(/\s+/).length < 3) return; // short input already filters as you type
+    setAsking(true); setAiNote("");
+    try {
+      const res = await fetch("/api/search", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query: text }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Search failed");
+      const f = data.filters ?? {};
+      setHouse(f.genderPref ?? "ALL");
+      setMaxPrice(f.maxRent ?? null);
+      setPrivateOnly(f.roomType === "PRIVATE");
+      setHalalOnly(f.halalKitchen === true);
+      setPetsOnly(f.petsAllowed === true);
+      setQuery(f.nearText ?? "");
+      setAiNote(`Filters set from “${text}”`);
+    } catch (err) {
+      setAiNote(err instanceof Error ? err.message : "Search failed");
+    } finally {
+      setAsking(false);
+    }
+  }
 
-          <label className="relative flex-1 sm:max-w-md">
-            <span className="sr-only">Search by address, campus or neighborhood</span>
+  // On iPad/desktop the results panel covers the right of the map, so frame the map in the visible part.
+  const padRight = typeof window !== "undefined" && isDesktop() ? Math.round(window.innerWidth * 0.46) : 24;
+
+  return (
+    <main className="relative h-dvh w-screen overflow-clip bg-paper text-ink">
+      {/* Map: full-bleed background */}
+      <section aria-label="Map" className="absolute inset-0">
+        {!TOKEN ? (
+          <div className="grid h-full place-items-center p-6 text-center">
+            <p className="max-w-sm text-ink/80">
+              The map needs a Mapbox token. Add <code className="rounded bg-white px-1">NEXT_MAPBOX_TOKEN</code> to
+              <code className="rounded bg-white px-1"> .env</code> and restart the dev server.
+            </p>
+          </div>
+        ) : (
+          <Map
+            ref={mapRef}
+            mapboxAccessToken={TOKEN}
+            onLoad={syncBounds}
+            onZoom={(e) => setShowPrices(e.viewState.zoom >= PIN_ZOOM)}
+            onMoveEnd={syncBounds}
+            initialViewState={{ bounds: START_BOUNDS, fitBoundsOptions: { padding: { top: 150, bottom: 40, left: 40, right: padRight } } }}
+            style={{ width: "100%", height: "100%" }}
+            mapStyle="mapbox://styles/mapbox/light-v11"
+            onClick={() => { setSelected(null); setPreview(null); }}
+          >
+            <div className="hidden md:block"><NavigationControl position="bottom-left" showCompass={false} /></div>
+            {filtered.map((l) => {
+              const active = selected?.id === l.id || preview?.id === l.id || hovered === l.id;
+              return (
+                <Marker
+                  key={l.id}
+                  longitude={l.lng}
+                  latitude={l.lat}
+                  anchor={showPrices ? "bottom" : "center"}
+                  style={{ zIndex: active ? 3 : 1 }}
+                  onClick={(e) => {
+                    e.originalEvent.stopPropagation();
+                    if (!showPrices) {
+                      mapRef.current?.flyTo({ center: [l.lng, l.lat], zoom: PIN_ZOOM + 0.5, duration: 800 });
+                      return;
+                    }
+                    if (!isDesktop()) { setPreview(l); return; }
+                    setSelected(l);
+                    cardRefs.current[l.id]?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                  }}
+                >
+                  {showPrices ? (
+                    <button
+                      onMouseEnter={() => setHovered(l.id)}
+                      onMouseLeave={() => setHovered(null)}
+                      aria-label={`${l.title}, ${usd(l.rentShare)} a month`}
+                      aria-pressed={active}
+                      className={`relative rounded-full px-3 py-1.5 text-[14px] font-bold shadow-[0_4px_14px_rgba(20,33,61,0.35)] outline-none ring-2 ring-white transition-transform duration-150 ease-out focus-visible:ring-4 focus-visible:ring-ink/40 ${
+                        active ? "scale-110 bg-lantern text-ink" : "bg-ink text-white"
+                      }`}
+                    >
+                      {short(l.rentShare)}
+                    </button>
+                  ) : (
+                    <button
+                      aria-label={`Zoom in to rooms near ${l.address}`}
+                      className="grid h-11 w-11 place-items-center rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ink/30"
+                    >
+                      <span className="relative grid h-5 w-5 place-items-center rounded-full bg-ink shadow-[0_2px_8px_rgba(20,33,61,0.45)] ring-[3px] ring-white">
+                        <span className={`h-1.5 w-1.5 rounded-full ${active ? "bg-lantern" : "bg-white"}`} />
+                      </span>
+                    </button>
+                  )}
+                </Marker>
+              );
+            })}
+          </Map>
+        )}
+      </section>
+
+      {/* Floating command bar: logo, one search box, filter pills */}
+      <header className="pointer-events-none absolute inset-x-3 top-3 z-30 flex flex-col gap-2 md:right-[calc(46%+1.5rem)] xl:right-[calc(40%+1.5rem)]">
+        <form onSubmit={askAi} className="glass pointer-events-auto flex h-14 items-center gap-2 rounded-2xl pl-2 pr-2.5 shadow-[0_10px_30px_rgba(20,33,61,0.18)]">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-ink">
+            <Star className="h-5 w-5 text-white" />
+          </span>
+          <span className="hidden shrink-0 font-display text-lg font-bold tracking-wide lg:block">Bayt Qareeb</span>
+          <label className="relative flex min-w-0 flex-1 items-center">
+            <span className="sr-only">Search by campus, place, or describe what you want</span>
+            <Svg d={Icon.search} className="pointer-events-none absolute left-3 h-5 w-5 text-ink/50" />
             <input
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Address, campus, or neighborhood"
-              className="h-11 w-full rounded-full sm:rounded-lg border border-ink/20 bg-white pl-4 pr-11 text-[15px] outline-none transition placeholder:text-ink/60 focus:border-ink focus:ring-2 focus:ring-ink/15"
+              onChange={(e) => { setQuery(e.target.value); setAiNote(""); }}
+              maxLength={300}
+              placeholder="Search or describe your room"
+              className="h-11 w-full rounded-xl bg-white/70 pl-10 pr-3 text-[15px] outline-none ring-1 ring-ink/10 transition placeholder:text-ink/55 focus:bg-white focus:ring-2 focus:ring-ink/30"
             />
-            <svg viewBox="0 0 24 24" className="pointer-events-none absolute right-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-ink/60" aria-hidden="true">
-              <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" fill="none" />
-              <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
           </label>
-
-          <div className="ml-auto shrink-0">
+          <button
+            type="submit"
+            disabled={asking || query.trim().split(/\s+/).length < 3}
+            title="Describe what you want and press Enter"
+            className="flex h-11 shrink-0 items-center gap-1.5 rounded-xl bg-ink px-3 text-sm font-semibold text-white transition hover:bg-ink/90 disabled:bg-ink/25"
+          >
+            <Svg d={Icon.spark} className={`h-4 w-4 ${asking ? "motion-safe:animate-spin" : ""}`} />
+            <span className="hidden sm:inline">{asking ? "Thinking…" : "Ask"}</span>
+          </button>
+          <div className="grid h-11 w-9 shrink-0 place-items-center">
             <UserButton />
           </div>
-        </div>
+        </form>
 
-        {/* Filter chips */}
-        <div className="flex snap-x items-center gap-2 overflow-x-auto px-4 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-6">
-          <Select
-            label="House"
-            value={house}
-            onChange={(v) => setHouse(v as typeof house)}
-            options={[["ALL", "Any house"], ["BROTHERS", "Brothers"], ["SISTERS", "Sisters"], ["ANY", "Mixed"]]}
+        <div className="pointer-events-auto -mx-3 flex items-center gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <Dropdown
+            icon={Icon.home}
+            label={house === "ALL" ? "House" : HOUSE[house].label}
             active={house !== "ALL"}
+            options={[["ALL", "Any house"], ["BROTHERS", "Brothers"], ["SISTERS", "Sisters"], ["ANY", "Mixed"]]}
+            value={house}
+            onChange={(v) => setHouse(v as House)}
           />
-          <Select
-            label="Price"
+          <Dropdown
+            icon={Icon.dollar}
+            label={maxPrice == null ? "Price" : `Up to ${usd(maxPrice)}`}
+            active={maxPrice != null}
+            options={[["", "Any price"], ...PRICES.map((p) => [String(p), `Up to ${usd(p)}`] as [string, string])]}
             value={maxPrice == null ? "" : String(maxPrice)}
             onChange={(v) => setMaxPrice(v ? Number(v) : null)}
-            options={[["", "Any price"], ["800", "Up to $800"], ["1000", "Up to $1,000"], ["1250", "Up to $1,250"], ["1500", "Up to $1,500"], ["2000", "Up to $2,000"]]}
-            active={maxPrice != null}
           />
-          <Chip on={privateOnly} onClick={() => setPrivateOnly((v) => !v)}>Private room</Chip>
-          <Chip on={halalOnly} onClick={() => setHalalOnly((v) => !v)}>Halal kitchen</Chip>
-          <Chip on={petsOnly} onClick={() => setPetsOnly((v) => !v)}>Pets OK</Chip>
+          <Pill icon={Icon.door} on={privateOnly} onClick={() => setPrivateOnly((v) => !v)}>Private room</Pill>
+          <Pill icon={Icon.bowl} on={halalOnly} onClick={() => setHalalOnly((v) => !v)}>Halal kitchen</Pill>
+          <Pill icon={Icon.paw} on={petsOnly} onClick={() => setPetsOnly((v) => !v)}>Pets OK</Pill>
           {activeFilters > 0 && (
-            <button onClick={clearFilters} className="ml-1 h-9 shrink-0 px-2 text-sm font-semibold underline underline-offset-2 [@media(pointer:coarse)]:h-11">
-              Reset ({activeFilters})
+            <button onClick={clearFilters} className="glass h-11 shrink-0 rounded-full px-4 text-sm font-semibold underline-offset-2 hover:underline md:h-10">
+              Clear ({activeFilters})
             </button>
           )}
         </div>
+
+        {aiNote && (
+          <p role="status" className="glass pointer-events-auto self-start rounded-full px-3 py-1.5 text-sm font-medium">
+            {aiNote}
+          </p>
+        )}
+        {TOKEN && !showPrices && status === "ready" && mobileView === "map" && (
+          <p className="glass self-center rounded-full px-4 py-2 text-sm font-semibold md:hidden">Zoom in to see prices</p>
+        )}
       </header>
 
-      <div className="relative flex min-h-0 flex-1">
-        {/* Map */}
-        <section
-          aria-label="Map"
-          className="relative min-w-0 flex-1"
-        >
-          <SearchBar onResults={setListings} />
-          {!TOKEN ? (
-            <div className="grid h-full place-items-center bg-paper p-6 text-center">
-              <p className="max-w-sm text-ink/80">
-                The map needs a Mapbox token. Add <code className="rounded bg-white px-1">NEXT_MAPBOX_TOKEN</code> to
-                <code className="rounded bg-white px-1"> .env</code> and restart the dev server.
-              </p>
-            </div>
-          ) : (
-            <Map
-              ref={mapRef}
-              mapboxAccessToken={TOKEN}
-              onLoad={syncBounds}
-              onZoom={(e) => setShowPrices(e.viewState.zoom >= PIN_ZOOM)}
-              onMoveEnd={syncBounds}
-              initialViewState={{ bounds: START_BOUNDS, fitBoundsOptions: { padding: 48 } }}
-              style={{ width: "100%", height: "100%" }}
-              mapStyle="mapbox://styles/mapbox/streets-v12"
-              onClick={() => { setSelected(null); setPreview(null); }}
-            >
-              <div className="hidden md:block"><NavigationControl position="top-right" showCompass={false} /></div>
-              {filtered.map((l) => {
-                const active = selected?.id === l.id || preview?.id === l.id || hovered === l.id;
-                return (
-                  <Marker
-                    key={l.id}
-                    longitude={l.lng}
-                    latitude={l.lat}
-                    anchor={showPrices ? "bottom" : "center"}
-                    style={{ zIndex: active ? 3 : 1 }}
-                    onClick={(e) => {
-                      e.originalEvent.stopPropagation();
-                      if (!showPrices) {
-                        mapRef.current?.flyTo({ center: [l.lng, l.lat], zoom: PIN_ZOOM + 0.5, duration: 800 });
-                        return;
-                      }
-                      if (!isDesktop()) { setPreview(l); return; }
-                      setSelected(l);
-                      cardRefs.current[l.id]?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-                    }}
-                  >
-                    {showPrices ? (
-                      <button
-                        onMouseEnter={() => setHovered(l.id)}
-                        onMouseLeave={() => setHovered(null)}
-                        aria-label={`${l.title}, ${usd(l.rentShare)} a month`}
-                        aria-pressed={active}
-                        className={`relative rounded-md px-2.5 py-1.5 text-[14px] font-bold shadow-[0_2px_6px_rgba(20,33,61,0.35)] outline-none transition-transform duration-150 ease-out focus-visible:ring-4 focus-visible:ring-ink/30 ${
-                          active ? "scale-110 bg-lantern text-ink" : "bg-ink text-white"
-                        }`}
-                      >
-                        {short(l.rentShare)}
-                        <span
-                          aria-hidden="true"
-                          className={`absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 ${active ? "bg-lantern" : "bg-ink"}`}
-                        />
-                      </button>
-                    ) : (
-                      <button
-                        aria-label={`Zoom in to rooms near ${l.address}`}
-                        className="grid h-11 w-11 place-items-center rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ink/30"
-                      >
-                        <span
-                          className={`rounded-full ring-2 ring-white shadow transition-all ${
-                            active ? "h-4 w-4 bg-lantern" : "h-3.5 w-3.5 bg-ink"
-                          }`}
-                        />
-                      </button>
-                    )}
-                  </Marker>
-                );
-              })}
-            </Map>
-          )}
-          {TOKEN && !showPrices && status === "ready" && (
-            <p className="glass pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold shadow-md">
-              Zoom in to see prices
-            </p>
-          )}
-        </section>
+      {TOKEN && !showPrices && status === "ready" && (
+        <p className="glass pointer-events-none absolute bottom-6 left-1/2 z-20 hidden -translate-x-[calc(50%+23vw)] whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold shadow-md md:block xl:-translate-x-[calc(50%+20vw)]">
+          Zoom in to see prices
+        </p>
+      )}
 
-        {/* Results list */}
-        <section
-          aria-label="Rooms"
-          className={`absolute inset-0 z-10 min-h-0 w-full overflow-y-auto overscroll-contain bg-white transition-opacity duration-200 md:static md:z-auto md:w-1/2 md:shrink-0 md:border-l md:border-ink/10 md:opacity-100 xl:w-[45%] 2xl:w-[40%] ${
-            mobileView === "list" ? "opacity-100" : "pointer-events-none opacity-0 md:pointer-events-auto"
-          }`}
-        >
-          <div className="px-4 pb-28 pt-4 sm:px-6 md:pb-8">
-            <h1 className="text-lg font-bold sm:text-xl">Student rooms for rent</h1>
-            <div className="mt-1 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-              <p className="min-w-0 truncate text-sm text-ink/65">
+      {/* Results: full screen on phones, floating glass panel on iPad and desktop */}
+      <section
+        aria-label="Rooms"
+        className={`absolute inset-0 z-10 overflow-y-auto overscroll-contain pt-[9.25rem] max-md:bg-paper transition-opacity duration-200 md:inset-auto md:bottom-3 md:right-3 md:top-3 md:w-[46%] md:rounded-3xl md:pt-0 md:opacity-100 md:shadow-[0_20px_50px_rgba(20,33,61,0.22)] md:glass xl:w-[40%] ${
+          mobileView === "list" ? "opacity-100" : "pointer-events-none opacity-0 md:pointer-events-auto"
+        }`}
+      >
+        <div className="px-4 pb-28 pt-3 md:px-5 md:pb-6 md:pt-5">
+          <div className="flex flex-wrap items-end justify-between gap-x-3 gap-y-2">
+            <div className="min-w-0">
+              <h1 className="whitespace-nowrap font-display text-lg font-bold leading-tight sm:text-2xl">Rooms near campus</h1>
+              <p className="mt-0.5 truncate text-sm text-ink/70">
                 {status === "loading" && "Finding rooms…"}
                 {status === "error" && "Couldn't load rooms. Refresh to try again."}
-                {status === "ready" && (
-                  <>
-                    {inView.length} {inView.length === 1 ? "room" : "rooms"}
-                    <span className="hidden sm:inline md:hidden xl:inline"> from verified .edu students</span>
-                  </>
-                )}
+                {status === "ready" && `${inView.length} ${inView.length === 1 ? "room" : "rooms"} · verified .edu students`}
               </p>
-              <label className="flex items-center gap-1.5 text-sm">
-                <span className="hidden text-ink/65 sm:inline">Sort:</span>
-                <select
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value as Sort)}
-                  className="-mr-2 min-h-[44px] cursor-pointer rounded-lg bg-transparent px-2 font-semibold underline underline-offset-2 outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+            </div>
+            <Dropdown
+              icon={Icon.sort}
+              label={sort === "price-asc" ? "Lowest price" : sort === "price-desc" ? "Highest price" : "Fewest roommates"}
+              active={false}
+              align="right"
+              options={[["price-asc", "Lowest price"], ["price-desc", "Highest price"], ["roommates", "Fewest roommates"]]}
+              value={sort}
+              onChange={(v) => setSort(v as Sort)}
+            />
+          </div>
+
+          {status === "loading" && (
+            <div className="mt-4 grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr))]">
+              {Array.from({ length: 4 }).map((_, i) => <div key={i} className="aspect-[4/3] animate-pulse rounded-2xl bg-white/70" />)}
+            </div>
+          )}
+
+          {status === "ready" && inView.length === 0 && (
+            <div className="mt-8 rounded-2xl bg-white p-8 text-center ring-1 ring-ink/10">
+              <p className="font-semibold">No rooms match here</p>
+              <p className="mt-1 text-sm text-ink/70">Zoom out on the map or clear your filters.</p>
+              <button onClick={clearFilters} className="mt-4 min-h-[44px] rounded-xl bg-ink px-5 text-sm font-semibold text-white hover:bg-ink/90">
+                Clear filters
+              </button>
+            </div>
+          )}
+
+          <ul className="mt-4 grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr))]">
+            {inView.map((l, i) => (
+              <li key={l.id} className="motion-safe:animate-fade-up" style={{ animationDelay: `${i * 40}ms` }}>
+                <article
+                  ref={(el) => { cardRefs.current[l.id] = el; }}
+                  onMouseEnter={() => setHovered(l.id)}
+                  onMouseLeave={() => setHovered(null)}
+                  className={`overflow-hidden rounded-2xl bg-white shadow-[0_2px_8px_rgba(20,33,61,0.08)] ring-1 transition-shadow duration-200 hover:shadow-[0_12px_28px_rgba(20,33,61,0.16)] ${
+                    selected?.id === l.id || hovered === l.id ? "ring-2 ring-ink" : "ring-ink/[0.07]"
+                  }`}
                 >
-                  <option value="price-asc">Price ↑</option>
-                  <option value="price-desc">Price ↓</option>
-                  <option value="roommates">Fewest roommates</option>
-                </select>
-              </label>
+                  <button onClick={() => openListing(l)} className="flex w-full text-left outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-ink/30 sm:block">
+                    <Cover listing={l} compact />
+                    <div className="min-w-0 flex-1 p-3.5">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <p className="text-2xl font-bold leading-none">{usd(l.rentShare)}<span className="text-base font-medium text-ink/60">/mo</span></p>
+                        <span className={`sm:hidden ${BADGE} ${HOUSE[l.genderPref].cls}`}>{HOUSE[l.genderPref].label}</span>
+                      </div>
+                      <p className="mt-2 text-sm">
+                        <b>{l.beds}</b> bd · <b>{l.baths}</b> ba · {l.roomType === "PRIVATE" ? "Private room" : "Shared room"}
+                        <span className="text-ink/60"> · {l.totalRoommates} roommates</span>
+                      </p>
+                      <p className="mt-1 truncate text-sm text-ink/70">{l.address}</p>
+                      <Lister email={l.contactEmail} />
+                    </div>
+                  </button>
+                </article>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* Phone map: tap a pin for a preview card */}
+      <div
+        className={`absolute inset-x-3 bottom-20 z-20 transition-all duration-300 ease-out md:hidden ${
+          preview && mobileView === "map" ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-6 opacity-0"
+        }`}
+      >
+        {preview && (
+          <button
+            onClick={() => { setSelected(preview); setPreview(null); }}
+            className="glass flex w-full overflow-hidden rounded-2xl text-left shadow-[0_8px_30px_rgba(20,33,61,0.3)]"
+          >
+            <img src={snapshot(preview, 200, 200)} alt="" className="h-auto w-28 shrink-0 object-cover" />
+            <div className="min-w-0 flex-1 p-3">
+              <p className="text-xl font-bold leading-none">{usd(preview.rentShare)}<span className="text-sm font-medium text-ink/60">/mo</span></p>
+              <p className="mt-1.5 text-sm"><b>{preview.beds}</b> bd · <b>{preview.baths}</b> ba · {preview.roomType === "PRIVATE" ? "Private" : "Shared"}</p>
+              <p className="mt-0.5 truncate text-sm text-ink/70">{preview.address}</p>
+              <span className={`mt-1.5 inline-block ${BADGE} ${HOUSE[preview.genderPref].cls}`}>{HOUSE[preview.genderPref].label}</span>
+            </div>
+          </button>
+        )}
+      </div>
+
+      {/* Phone list/map toggle */}
+      <button
+        onClick={() => { setMobileView((v) => (v === "list" ? "map" : "list")); setPreview(null); }}
+        className={`absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-30 flex h-12 -translate-x-1/2 items-center gap-2 rounded-full bg-ink px-6 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(20,33,61,0.35)] transition active:scale-95 md:hidden ${
+          selected ? "pointer-events-none opacity-0" : ""
+        }`}
+      >
+        {mobileView === "list" ? "Map" : `List (${inView.length})`}
+      </button>
+
+      {/* Details */}
+      <div
+        aria-hidden={!selected}
+        onClick={() => setSelected(null)}
+        className={`absolute inset-0 z-40 bg-ink/40 backdrop-blur-[2px] transition-opacity duration-300 ${selected ? "opacity-100" : "pointer-events-none opacity-0"}`}
+      />
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-label="Room details"
+        aria-hidden={!selected}
+        className={`fixed inset-0 z-50 w-full overflow-y-auto overscroll-contain bg-white transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:inset-y-3 sm:left-auto sm:right-3 sm:w-[min(520px,92%)] sm:rounded-3xl ${
+          selected
+            ? "translate-y-0 shadow-[0_20px_60px_rgba(20,33,61,0.35)] sm:translate-x-0"
+            : "pointer-events-none invisible translate-y-full sm:translate-y-0 sm:translate-x-[110%]"
+        }`}
+      >
+        {selected && (
+          <div className="flex min-h-full flex-col">
+            <div className="relative">
+              <Cover listing={selected} tall />
+              <button
+                onClick={() => setSelected(null)}
+                aria-label="Close room details"
+                className="glass absolute right-3 top-3 grid h-11 w-11 place-items-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink"
+              >
+                <Svg d={Icon.close} className="h-5 w-5" />
+              </button>
             </div>
 
-            {status === "loading" && (
-              <div className="mt-4 grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr))]">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="aspect-[4/3] animate-pulse rounded-2xl bg-paper" />
-                ))}
+            <div className="flex-1 px-5 pb-6 pt-5">
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-3xl font-bold">{usd(selected.rentShare)}<span className="text-lg font-medium text-ink/60">/mo</span></p>
+                <span className={`mt-1 ${BADGE} ${HOUSE[selected.genderPref].cls}`}>{HOUSE[selected.genderPref].label} house</span>
               </div>
-            )}
+              <p className="mt-1.5"><b>{selected.beds}</b> bd · <b>{selected.baths}</b> ba · {selected.totalRoommates} roommates</p>
+              <h2 ref={headingRef} tabIndex={-1} className="mt-3 text-lg font-semibold leading-snug outline-none">{selected.title}</h2>
+              <p className="text-ink/70">{selected.address}</p>
 
-            {status === "ready" && inView.length === 0 && (
-              <div className="mt-10 rounded-xl border border-dashed border-ink/20 p-8 text-center">
-                <p className="font-semibold">No rooms match here</p>
-                <p className="mt-1 text-sm text-ink/65">Try zooming out or clearing filters.</p>
-                <button onClick={clearFilters} className="mt-4 rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink/90">
-                  Clear filters
-                </button>
-              </div>
-            )}
-
-            {/* Cards size by percentage of the panel: 1 column on phones, 2+ as the panel widens. */}
-            <ul className="mt-4 grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr))]">
-              {inView.map((l, i) => (
-                <li key={l.id} className="motion-safe:animate-fade-up" style={{ animationDelay: `${i * 40}ms` }}>
-                  <article
-                    ref={(el) => { cardRefs.current[l.id] = el; }}
-                    onMouseEnter={() => setHovered(l.id)}
-                    onMouseLeave={() => setHovered(null)}
-                    className={`group overflow-hidden rounded-2xl bg-white shadow-[0_1px_3px_rgba(20,33,61,0.15)] ring-1 transition-shadow duration-200 hover:shadow-[0_8px_24px_rgba(20,33,61,0.18)] ${
-                      selected?.id === l.id || hovered === l.id ? "ring-2 ring-ink" : "ring-ink/10"
-                    }`}
-                  >
-                    <button onClick={() => openListing(l)} className="flex w-full text-left outline-none focus-visible:ring-4 focus-visible:ring-ink/30 sm:block">
-                      <CardCover listing={l} compact />
-                      <div className="min-w-0 flex-1 p-3.5">
-                        <span className={`mb-2 inline-block sm:hidden ${BADGE} ${HOUSE[l.genderPref].cls}`}>{HOUSE[l.genderPref].label}</span>
-                        <p className="text-2xl font-bold leading-none">
-                          {usd(l.rentShare)}<span className="text-base font-medium text-ink/60">/mo</span>
-                        </p>
-                        <p className="mt-2 text-sm">
-                          <b>{l.beds}</b> bd <span className="text-ink/30">|</span> <b>{l.baths}</b> ba{" "}
-                          <span className="text-ink/30">|</span> {l.roomType === "PRIVATE" ? "Private room" : "Shared room"}
-                          <span className="text-ink/60"> · {l.totalRoommates} roommates</span>
-                        </p>
-                        <p className="mt-1 truncate text-sm text-ink/70">{l.address}</p>
-                        <Lister email={l.contactEmail} />
-                      </div>
-                    </button>
-                  </article>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        {/* Mobile map preview card */}
-        <div
-          className={`absolute inset-x-3 bottom-20 z-20 transition-all duration-300 ease-out md:hidden ${
-            preview && mobileView === "map" ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-6 opacity-0"
-          }`}
-        >
-          {preview && (
-            <button
-              onClick={() => { setSelected(preview); setPreview(null); }}
-              className="glass flex w-full overflow-hidden rounded-2xl text-left shadow-[0_8px_30px_rgba(20,33,61,0.3)]"
-            >
-              <div className="relative w-24 shrink-0 overflow-hidden bg-ink">
-                <Star className="absolute -bottom-4 -right-4 h-20 w-20 text-white/10" />
-              </div>
-              <div className="min-w-0 flex-1 p-3">
-                <p className="text-xl font-bold leading-none">{usd(preview.rentShare)}<span className="text-sm font-medium text-ink/60">/mo</span></p>
-                <p className="mt-1.5 text-sm"><b>{preview.beds}</b> bd · <b>{preview.baths}</b> ba · {preview.roomType === "PRIVATE" ? "Private" : "Shared"}</p>
-                <p className="mt-0.5 truncate text-sm text-ink/70">{preview.address}</p>
-                <span className={`mt-1.5 inline-block ${BADGE} ${HOUSE[preview.genderPref].cls}`}>{HOUSE[preview.genderPref].label}</span>
-              </div>
-            </button>
-          )}
-        </div>
-
-        {/* Mobile list/map toggle */}
-        <button
-          onClick={() => { setMobileView((v) => (v === "list" ? "map" : "list")); setPreview(null); }}
-          className={`absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(20,33,61,0.35)] transition active:scale-95 md:hidden ${
-            selected ? "pointer-events-none opacity-0" : ""
-          }`}
-        >
-          {mobileView === "list" ? (
-            <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinejoin="round" /></svg>
-          ) : (
-            <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
-          )}
-          {mobileView === "list" ? "Map" : `List (${inView.length})`}
-        </button>
-
-        {/* Detail modal (Zillow-style overlay) */}
-        <div
-          aria-hidden={!selected}
-          onClick={() => setSelected(null)}
-          className={`absolute inset-0 z-40 bg-ink/40 backdrop-blur-[2px] transition-opacity duration-300 ${
-            selected ? "opacity-100" : "pointer-events-none opacity-0"
-          }`}
-        />
-        <aside
-          role="dialog"
-          aria-modal="true"
-          aria-label="Room details"
-          aria-hidden={!selected}
-          className={`fixed inset-x-0 bottom-0 top-0 z-50 w-full overflow-y-auto overscroll-contain bg-white transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:absolute sm:left-auto sm:w-[min(520px,90%)] ${
-            selected
-              ? "translate-y-0 shadow-[-12px_0_40px_rgba(20,33,61,0.25)] sm:translate-x-0"
-              : "pointer-events-none invisible translate-y-full sm:translate-y-0 sm:translate-x-full"
-          }`}
-        >
-          {selected && (
-            <div className="flex min-h-full flex-col">
-              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-ink/10 bg-white/95 px-5 py-2.5 backdrop-blur">
-                <span className={`${BADGE} ${HOUSE[selected.genderPref].cls}`}>
-                  {HOUSE[selected.genderPref].label} house
-                </span>
-                <button
-                  onClick={() => setSelected(null)}
-                  aria-label="Close room details"
-                  className="grid h-11 w-11 place-items-center rounded-full hover:bg-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink"
-                >
-                  <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-                    <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
-                </button>
-              </div>
-
-              <CardCover listing={selected} tall />
-
-              <div className="flex-1 px-5 pb-6 pt-5">
-                <p className="text-3xl font-bold">
-                  {usd(selected.rentShare)}<span className="text-lg font-medium text-ink/60">/mo</span>
-                </p>
-                <p className="mt-1.5">
-                  <b>{selected.beds}</b> bd <span className="text-ink/30">|</span> <b>{selected.baths}</b> ba{" "}
-                  <span className="text-ink/30">|</span> {selected.totalRoommates} roommates
-                </p>
-                <h2 ref={headingRef} tabIndex={-1} className="mt-3 text-lg font-semibold leading-snug outline-none">
-                  {selected.title}
-                </h2>
-                <p className="text-ink/65">{selected.address}</p>
-
-                <section className="mt-6 rounded-xl border border-ink/10 p-4">
-                  <h3 className="font-semibold">Monthly cost</h3>
-                  <dl className="mt-3 space-y-2 text-sm">
-                    <Row label="Your rent share" value={usd(selected.rentShare)} />
-                    <Row label="Utilities (avg.)" value={`+ ${usd(selected.avgUtilities)}`} />
-                    <Row label="Estimated total" value={usd(selected.rentShare + selected.avgUtilities)} strong />
-                    <Row label="Whole apartment" value={usd(selected.totalRent)} muted />
-                  </dl>
-                </section>
-
-                <h3 className="mt-6 font-semibold">Facts & features</h3>
-                <dl className="mt-3 grid grid-cols-2 gap-3">
-                  <Fact label="Room" value={selected.roomType === "PRIVATE" ? "Private" : "Shared"} />
-                  <Fact label="Roommates" value={`${selected.totalRoommates} total`} />
-                  <Fact label="Bedrooms" value={selected.beds} />
-                  <Fact label="Bathrooms" value={selected.baths} />
+              <section className="mt-6 rounded-2xl bg-paper p-4">
+                <h3 className="font-semibold">Monthly cost</h3>
+                <dl className="mt-3 space-y-2 text-sm">
+                  <Row label="Your rent share" value={usd(selected.rentShare)} />
+                  <Row label="Utilities (avg.)" value={`+ ${usd(selected.avgUtilities)}`} />
+                  <Row label="Estimated total" value={usd(selected.rentShare + selected.avgUtilities)} strong />
+                  <Row label="Whole apartment" value={usd(selected.totalRent)} muted />
                 </dl>
+              </section>
 
-                <h3 className="mt-6 font-semibold">House rules</h3>
-                <ul className="mt-3 space-y-2">
-                  <Rule ok={selected.halalKitchen} yes="Halal kitchen" no="Kitchen isn't halal-only" />
-                  <Rule ok={selected.petsAllowed} yes="Pets welcome" no="No pets" />
-                </ul>
+              <h3 className="mt-6 font-semibold">Facts & features</h3>
+              <dl className="mt-3 grid grid-cols-2 gap-3">
+                <Fact label="Room" value={selected.roomType === "PRIVATE" ? "Private" : "Shared"} />
+                <Fact label="Roommates" value={`${selected.totalRoommates} total`} />
+                <Fact label="Bedrooms" value={selected.beds} />
+                <Fact label="Bathrooms" value={selected.baths} />
+              </dl>
 
-                {selected.description && (
-                  <>
-                    <h3 className="mt-6 font-semibold">What's special</h3>
-                    <p className="mt-2 max-w-prose leading-relaxed text-ink/80">{selected.description}</p>
-                  </>
-                )}
-              </div>
+              <h3 className="mt-6 font-semibold">House rules</h3>
+              <ul className="mt-3 space-y-2">
+                <Rule ok={selected.halalKitchen} yes="Halal kitchen" no="Kitchen isn't halal-only" />
+                <Rule ok={selected.petsAllowed} yes="Pets welcome" no="No pets" />
+              </ul>
 
-              <div className="sticky bottom-0 border-t border-ink/10 bg-white px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
-                <div className="flex items-center gap-3">
-                <div className="shrink-0 sm:hidden">
+              {selected.description && (
+                <>
+                  <h3 className="mt-6 font-semibold">What's special</h3>
+                  <p className="mt-2 max-w-prose leading-relaxed text-ink/80">{selected.description}</p>
+                </>
+              )}
+              <Lister email={selected.contactEmail} />
+            </div>
+
+            <div className="sticky bottom-0 border-t border-ink/10 bg-white px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
+              <div className="flex items-center gap-3">
+                <div className="shrink-0">
                   <p className="text-lg font-bold leading-none">{usd(selected.rentShare + selected.avgUtilities)}</p>
                   <p className="text-xs text-ink/60">est. / month</p>
                 </div>
                 <a
                   href={`mailto:${selected.contactEmail}?subject=${encodeURIComponent("Bayt Qareeb: " + selected.title)}`}
-                  className="block flex-1 rounded-lg bg-lantern py-3.5 text-center font-bold text-ink transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+                  className="block flex-1 rounded-xl bg-lantern py-3.5 text-center font-bold text-ink transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
                 >
                   Contact lister
                 </a>
-                </div>
-                <p className="mt-2 text-center text-xs text-ink/60">{selected.contactEmail}</p>
               </div>
             </div>
-          )}
-        </aside>
-      </div>
+          </div>
+        )}
+      </aside>
     </main>
   );
 }
 
-// No photos in the data yet, so cards get a branded cover with the key badges.
-function CardCover({ listing: l, tall, compact }: { listing: Listing; tall?: boolean; compact?: boolean }) {
+function Cover({ listing: l, tall, compact }: { listing: Listing; tall?: boolean; compact?: boolean }) {
   return (
-    <div className={`relative shrink-0 overflow-hidden bg-ink ${tall ? "aspect-[16/8]" : compact ? "w-[28%] sm:w-auto sm:aspect-[16/7]" : "aspect-[16/7]"}`}>
-      <Star className="absolute -bottom-10 -right-8 h-40 w-40 text-white/[0.07]" />
-      <div className={`absolute left-3 top-3 flex-wrap gap-1.5 ${compact ? "hidden sm:flex" : "flex"}`}>
-        <span className={`${BADGE} ${HOUSE[l.genderPref].cls}`}>{HOUSE[l.genderPref].label}</span>
-        {l.halalKitchen && <span className={`${BADGE} bg-white text-ink`}>Halal kitchen</span>}
+    <div className={`relative shrink-0 overflow-hidden bg-paper ${tall ? "aspect-[16/9]" : compact ? "w-[30%] sm:w-auto sm:aspect-[16/9]" : "aspect-[16/9]"}`}>
+      {TOKEN && (
+        <img
+          src={snapshot(l, tall ? 640 : 420, tall ? 360 : 236)}
+          alt={`Map of ${l.address}`}
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      )}
+      <div className={`absolute left-2.5 top-2.5 flex-wrap gap-1.5 ${tall ? "hidden" : compact ? "hidden sm:flex" : "flex"}`}>
+        <span className={`${BADGE} shadow-sm ${HOUSE[l.genderPref].cls}`}>{HOUSE[l.genderPref].label}</span>
+        {l.halalKitchen && <span className={`${BADGE} bg-white text-ink shadow-sm ring-1 ring-ink/10`}>Halal kitchen</span>}
       </div>
     </div>
   );
 }
 
-function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; children: React.ReactNode }) {
+function Pill({ on, onClick, icon, children }: { on: boolean; onClick: () => void; icon: React.ReactNode; children: React.ReactNode }) {
   return (
     <button
       onClick={onClick}
       aria-pressed={on}
-      className={`h-9 shrink-0 rounded-lg border px-3.5 [@media(pointer:coarse)]:h-11 text-sm font-semibold transition-colors ${
-        on ? "border-ink bg-ink text-white" : "border-ink/25 bg-white hover:border-ink"
+      className={`flex h-11 shrink-0 items-center gap-1.5 rounded-full px-4 text-sm font-semibold shadow-[0_4px_14px_rgba(20,33,61,0.12)] transition-colors md:h-10 [@media(pointer:coarse)]:h-11 ${
+        on ? "bg-ink text-white" : "glass hover:bg-white"
       }`}
     >
+      <Svg d={on ? Icon.check : icon} />
       {children}
     </button>
   );
 }
 
-function Select({ label, value, onChange, options, active }: {
-  label: string; value: string; onChange: (v: string) => void; options: [string, string][]; active: boolean;
+// Custom dropdown so filters match the glass pills instead of the browser's native <select>.
+function Dropdown({ icon, label, active, options, value, onChange, align = "left" }: {
+  icon: React.ReactNode; label: string; active: boolean; options: [string, string][];
+  value: string; onChange: (v: string) => void; align?: "left" | "right";
 }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState({ top: 0, left: 0, right: 0 });
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent | KeyboardEvent) => {
+      if (e instanceof KeyboardEvent ? e.key === "Escape" : !ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", close);
+    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", close); };
+  }, [open]);
+
   return (
-    <label className="relative shrink-0">
-      <span className="sr-only">{label}</span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`h-9 cursor-pointer appearance-none [@media(pointer:coarse)]:h-11 rounded-lg border pl-3.5 pr-8 text-sm font-semibold outline-none transition-colors ${
-          active ? "border-ink bg-ink text-white" : "border-ink/25 bg-white hover:border-ink"
+    <div ref={ref} className="shrink-0">
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={(e) => {
+          const r = e.currentTarget.getBoundingClientRect();
+          setPos({ top: r.bottom + 6, left: r.left, right: window.innerWidth - r.right });
+          setOpen((o) => !o);
+        }}
+        className={`flex h-11 items-center gap-1.5 rounded-full pl-4 pr-3 text-sm font-semibold shadow-[0_4px_14px_rgba(20,33,61,0.12)] transition-colors md:h-10 [@media(pointer:coarse)]:h-11 ${
+          active ? "bg-ink text-white" : "glass hover:bg-white"
         }`}
       >
-        {options.map(([v, t]) => <option key={v} value={v} className="bg-white text-ink">{t}</option>)}
-      </select>
-      <svg viewBox="0 0 24 24" className={`pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 ${active ? "text-white" : "text-ink"}`} aria-hidden="true">
-        <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
-      </svg>
-    </label>
+        <Svg d={icon} />
+        {label}
+        <Svg d={Icon.chevron} className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        // Fixed so the menu isn't clipped by the horizontally scrolling pill row.
+        <ul
+          role="listbox"
+          style={align === "right" ? { top: pos.top, right: pos.right } : { top: pos.top, left: pos.left }}
+          className="glass fixed z-[60] min-w-[11rem] overflow-hidden rounded-2xl p-1.5 shadow-[0_16px_40px_rgba(20,33,61,0.22)] motion-safe:animate-fade-up"
+        >
+          {options.map(([v, t]) => (
+            <li key={v}>
+              <button
+                type="button"
+                role="option"
+                aria-selected={v === value}
+                onClick={() => { onChange(v); setOpen(false); }}
+                className={`flex min-h-[44px] w-full items-center justify-between gap-4 rounded-xl px-3 text-left text-sm font-medium transition-colors ${
+                  v === value ? "bg-ink text-white" : "hover:bg-ink/[0.06]"
+                }`}
+              >
+                {t}
+                {v === value && <Svg d={Icon.check} />}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 
 function Row({ label, value, strong, muted }: { label: string; value: string; strong?: boolean; muted?: boolean }) {
   return (
-    <div className={`flex justify-between ${muted ? "text-ink/55" : ""} ${strong ? "border-t border-ink/10 pt-2 font-bold" : ""}`}>
+    <div className={`flex justify-between ${muted ? "text-ink/60" : ""} ${strong ? "border-t border-ink/10 pt-2 font-bold" : ""}`}>
       <dt>{label}</dt>
       <dd>{value}</dd>
     </div>
@@ -561,7 +638,7 @@ function Row({ label, value, strong, muted }: { label: string; value: string; st
 
 function Fact({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-lg bg-paper px-3 py-2.5">
+    <div className="rounded-xl bg-paper px-3 py-2.5">
       <dt className="text-xs text-ink/60">{label}</dt>
       <dd className="font-semibold">{value}</dd>
     </div>
@@ -572,9 +649,7 @@ function Rule({ ok, yes, no }: { ok: boolean; yes: string; no: string }) {
   return (
     <li className="flex items-center gap-3">
       <span className={`grid h-6 w-6 place-items-center rounded-full ${ok ? "bg-sage/15 text-sage" : "bg-clay/10 text-clay"}`}>
-        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
-          <path d={ok ? "M5 12.5l4.5 4.5L19 7.5" : "M7 7l10 10M17 7L7 17"} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-        </svg>
+        <Svg d={ok ? Icon.check : Icon.close} className="h-3.5 w-3.5" />
       </span>
       <span>{ok ? yes : no}</span>
     </li>
