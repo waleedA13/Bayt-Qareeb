@@ -19,7 +19,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
   const data = await prepareListing(req, current);
   if (data instanceof Response) return data;
   try {
-    return Response.json(await prisma.listing.update({ where, data }));
+    return Response.json(await prisma.listing.update({ where, data: { ...data, contactEmail: user.email } }));
   } catch (e) {
     if (isMissing(e)) return notFound(); // deleted in the meantime
     throw e;
