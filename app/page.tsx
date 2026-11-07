@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -19,7 +17,7 @@ type Listing = {
 type Bounds = { w: number; s: number; e: number; n: number } | null;
 type Sort = "price-asc" | "price-desc" | "roommates";
 
-const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+const TOKEN = process.env.NEXT_MAPBOX_TOKEN;
 const PIN_ZOOM = 10;
 
 const HOUSE = {
@@ -44,7 +42,7 @@ export default function Home() {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [selected, setSelected] = useState<Listing | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
-  const [zoom, setZoom] = useState(5.3);
+  const [showPrices, setShowPrices] = useState(false);
   const [bounds, setBounds] = useState<Bounds>(null);
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
   // Mobile map: tapping a pin shows a small preview card first (like Zillow), tap it for details.
@@ -104,8 +102,6 @@ export default function Home() {
     return filtered.filter((l) => l.lng >= bounds.w && l.lng <= bounds.e && l.lat >= bounds.s && l.lat <= bounds.n);
   }, [filtered, bounds]);
 
-  const showPrices = zoom >= PIN_ZOOM;
-
   const syncBounds = () => {
     const b = mapRef.current?.getBounds();
     if (b) setBounds({ w: b.getWest(), s: b.getSouth(), e: b.getEast(), n: b.getNorth() });
@@ -113,7 +109,7 @@ export default function Home() {
 
   const openListing = (l: Listing) => {
     setSelected(l);
-    mapRef.current?.flyTo({ center: [l.lng, l.lat], zoom: Math.max(zoom, PIN_ZOOM + 1), duration: 800 });
+    mapRef.current?.flyTo({ center: [l.lng, l.lat], zoom: Math.max(mapRef.current?.getZoom() ?? 0, PIN_ZOOM + 1), duration: 800 });
   };
 
   const clearFilters = () => {
@@ -184,7 +180,7 @@ export default function Home() {
           {!TOKEN ? (
             <div className="grid h-full place-items-center bg-paper p-6 text-center">
               <p className="max-w-sm text-ink/80">
-                The map needs a Mapbox token. Add <code className="rounded bg-white px-1">NEXT_PUBLIC_MAPBOX_TOKEN</code> to
+                The map needs a Mapbox token. Add <code className="rounded bg-white px-1">NEXT_MAPBOX_TOKEN</code> to
                 <code className="rounded bg-white px-1"> .env</code> and restart the dev server.
               </p>
             </div>
@@ -193,7 +189,7 @@ export default function Home() {
               ref={mapRef}
               mapboxAccessToken={TOKEN}
               onLoad={syncBounds}
-              onMove={(e) => setZoom(e.viewState.zoom)}
+              onZoom={(e) => setShowPrices(e.viewState.zoom >= PIN_ZOOM)}
               onMoveEnd={syncBounds}
               initialViewState={{ longitude: -120.5, latitude: 36.0, zoom: 5.3 }}
               style={{ width: "100%", height: "100%" }}
@@ -240,7 +236,7 @@ export default function Home() {
                     ) : (
                       <button
                         aria-label={`Zoom in to rooms near ${l.address}`}
-                        className="grid h-8 w-8 place-items-center rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ink/30"
+                        className="grid h-11 w-11 place-items-center rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ink/30"
                       >
                         <span
                           className={`rounded-full ring-2 ring-white shadow transition-all ${

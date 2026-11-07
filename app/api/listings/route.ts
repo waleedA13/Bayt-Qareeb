@@ -1,10 +1,13 @@
-import seedListings from "@/prisma/seed-data.json";
+import { prisma } from "@/lib/db";
+import seed from "@/prisma/seed-data.json";
 
-const listings = seedListings.map((listing, index) => ({
-  id: `placeholder-${index + 1}`,
-  ...listing,
-}));
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return Response.json(listings);
+  try {
+    return Response.json(await prisma.listing.findMany());
+  } catch {
+    // ponytail: no SQLite file on Vercel, so serve the seed data for the demo.
+    return Response.json(seed.map((l, i) => ({ id: `seed-${i}`, ...l })));
+  }
 }
