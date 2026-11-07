@@ -14,6 +14,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <ClerkProvider publishableKey={process.env.NEXT_CLERK_PUBLISHABLE_KEY}>
     <html lang="en">
       <head>
+        <link rel="preload" href="/api/listings" as="fetch" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
