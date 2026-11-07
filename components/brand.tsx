@@ -19,7 +19,7 @@ export function Star({ className = "" }: { className?: string }) {
 
 export function Logo() {
   return (
-    <Link href="/" className="flex shrink-0 items-center gap-2.5 rounded-xl outline-none focus-visible:ring-4 focus-visible:ring-ink/25">
+    <Link href="/" className="flex min-h-[44px] shrink-0 items-center gap-2.5 rounded-xl outline-none focus-visible:ring-4 focus-visible:ring-ink/25">
       <span className="grid h-10 w-10 place-items-center rounded-xl bg-ink">
         <Star className="h-5 w-5 text-white" />
       </span>
