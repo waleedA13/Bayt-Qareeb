@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Map, { Marker, NavigationControl, type MapRef } from "react-map-gl";
+import { UserButton } from "@clerk/nextjs";
+import SearchBar from "@/components/SearchBar";
 
 // Zillow-style layout: search + filter bar on top, map on the left, scrollable
 // listing cards on the right. Same data, same stack (Next + react-map-gl + Tailwind).
@@ -33,6 +35,7 @@ const START_BOUNDS: [[number, number], [number, number]] = [[-122.6, 33.8], [-11
 const usd = (n: number) => `$${n.toLocaleString()}`;
 const short = (n: number) => (n >= 1000 ? `$${(n / 1000).toFixed(n % 1000 ? 1 : 0)}K` : `$${n}`);
 
+// Eight-point star (Rub el Hizb), the Bayt Qareeb mark.
 function Star({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
@@ -130,7 +133,7 @@ export default function Home() {
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-ink">
               <Star className="h-5 w-5 text-white" />
             </span>
-            <span className="hidden font-display text-xl font-bold tracking-wide sm:block">Manara</span>
+            <span className="hidden font-display text-xl font-bold tracking-wide sm:block">Bayt Qareeb</span>
           </div>
 
           <label className="relative flex-1 sm:max-w-md">
@@ -146,6 +149,10 @@ export default function Home() {
               <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </label>
+
+          <div className="ml-auto shrink-0">
+            <UserButton />
+          </div>
         </div>
 
         {/* Filter chips */}
@@ -181,6 +188,7 @@ export default function Home() {
           aria-label="Map"
           className="relative min-w-0 flex-1"
         >
+          <SearchBar onResults={setListings} />
           {!TOKEN ? (
             <div className="grid h-full place-items-center bg-paper p-6 text-center">
               <p className="max-w-sm text-ink/80">
@@ -477,7 +485,7 @@ export default function Home() {
                   <p className="text-xs text-ink/60">est. / month</p>
                 </div>
                 <a
-                  href={`mailto:${selected.contactEmail}?subject=${encodeURIComponent("Manara: " + selected.title)}`}
+                  href={`mailto:${selected.contactEmail}?subject=${encodeURIComponent("Bayt Qareeb: " + selected.title)}`}
                   className="block flex-1 rounded-lg bg-lantern py-3.5 text-center font-bold text-ink transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
                 >
                   Contact lister

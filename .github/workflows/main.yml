@@ -20,8 +20,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      DATABASE_URL: file:./dev.db
+      # Placeholders: the build never connects to the database or Clerk.
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      DIRECT_URL: postgresql://ci:ci@localhost:5432/ci
       NEXT_MAPBOX_TOKEN: pk.ci-placeholder
+      NEXT_CLERK_PUBLISHABLE_KEY: pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk
+      CLERK_SECRET_KEY: sk_test_ci-placeholder
       NEXT_TELEMETRY_DISABLED: 1
     steps:
       # Actions are pinned to full commit SHAs so a moved tag can't inject code.

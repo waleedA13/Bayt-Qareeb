@@ -1,19 +1,14 @@
-import { existsSync } from "node:fs";
-import path from "node:path";
+import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
-import seed from "@/prisma/seed-data.json";
+import { isEduUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-const hasDb = existsSync(path.join(process.cwd(), "prisma", "dev.db"));
-const seedListings = seed.map((l, i) => ({ id: `seed-${i}`, ...l }));
-
 export async function GET() {
-  // ponytail: no SQLite file on Vercel, so serve the seed data straight away (and let the CDN cache it).
-  if (!hasDb) {
-    return Response.json(seedListings, {
-      headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" },
-    });
+  // Listings include students' contact emails, so only verified .edu users can read them.
+  if (!isEduUser(await currentUser())) {
+    return Response.json({ error: "Only verified .edu students can view listings." }, { status: 403 });
   }
-  return Response.json(await prisma.listing.findMany());
+  const listings = await prisma.listing.findMany();
+  return Response.json(listings);
 }
