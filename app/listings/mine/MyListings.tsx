@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Shell } from "../Shell";
 import ListingForm, { type MyListing } from "../ListingForm";
 
@@ -16,6 +16,14 @@ export default function MyListings({ initial, email }: { initial: MyListing[]; e
   const [confirming, setConfirming] = useState<string | null>(null);
   const [error, setError] = useState<{ id: string; msg: string } | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // On a phone the edit form opens below the fold, so bring it into view and move focus to it.
+  useEffect(() => {
+    const h = editing && document.getElementById(`edit-${editing}`);
+    if (!h) return;
+    h.focus({ preventScroll: true });
+    h.closest("li")?.scrollIntoView({ block: "start" });
+  }, [editing]);
 
   async function remove(id: string) {
     setBusy(true);
@@ -59,8 +67,8 @@ export default function MyListings({ initial, email }: { initial: MyListing[]; e
       <ul className="mt-6 space-y-4">
         {listings.map((l) =>
           editing === l.id ? (
-            <li key={l.id} className="rounded-xl border-2 border-ink/80 bg-paper px-3 pb-1 pt-3">
-              <h2 className="font-display text-xl font-bold">Edit listing</h2>
+            <li key={l.id} className="scroll-mt-24 rounded-xl border-2 border-ink/80 bg-paper px-3 pb-1 pt-3">
+              <h2 id={`edit-${l.id}`} tabIndex={-1} className="font-display text-xl font-bold outline-none">Edit listing</h2>
               <ListingForm
                 listing={l}
                 onCancel={() => setEditing(null)}

@@ -169,7 +169,7 @@ export default function ListingForm({ listing, onSaved, onCancel }: {
         </div>
       </Section>
 
-      <div className="sticky bottom-0 -mx-4 mt-6 border-t border-ink/10 bg-white px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 sm:mx-0 sm:rounded-xl sm:border">
+      <div className="sticky bottom-0 mt-6 rounded-t-xl border border-b-0 border-ink/10 bg-white px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-6px_20px_rgba(20,33,61,0.08)] sm:bottom-3 sm:rounded-xl sm:border-b">
         <p role="alert" className={formError ? "mb-3 rounded-lg bg-clay/10 px-3 py-2 text-[15px] font-medium text-clay" : "sr-only"}>{formError}</p>
         <div className="flex items-center gap-3">
           <div className="shrink-0">
@@ -177,13 +177,13 @@ export default function ListingForm({ listing, onSaved, onCancel }: {
             <p className="text-xs text-ink/60">est. / month</p>
           </div>
           {onCancel && (
-            <button type="button" onClick={onCancel} className="ml-auto min-h-[48px] rounded-lg px-4 font-semibold hover:bg-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink">
+            <button type="button" onClick={onCancel} className="ml-auto min-h-[48px] whitespace-nowrap rounded-lg px-3 font-semibold hover:bg-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink">
               Cancel
             </button>
           )}
           <button
             type="submit" disabled={saving}
-            className={`${onCancel ? "" : "flex-1"} min-h-[48px] rounded-lg bg-lantern px-6 font-bold text-ink transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink disabled:opacity-60`}
+            className={`${onCancel ? "" : "flex-1"} min-h-[48px] whitespace-nowrap rounded-lg bg-lantern px-5 font-bold text-ink transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink disabled:opacity-60`}
           >
             {saving ? (listing ? "Saving…" : "Posting…") : listing ? "Save changes" : "Post room"}
           </button>

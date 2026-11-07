@@ -343,7 +343,8 @@ export default function Home() {
           <Link
             href="/listings/new"
             aria-label="Post a room"
-            className="flex h-11 shrink-0 items-center gap-1.5 rounded-xl bg-lantern px-3 text-sm font-bold text-ink transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+            // Phones keep the bar for search; Post a room and My listings are in the account menu there.
+            className="hidden h-11 min-w-[44px] shrink-0 items-center sm:flex justify-center gap-1.5 rounded-xl bg-lantern px-3 text-sm font-bold text-ink transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           >
             <Svg d={Icon.plus} className="h-4 w-4" />
             <span className="hidden md:inline">Post a room</span>
