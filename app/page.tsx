@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Map, { Marker, NavigationControl, type MapRef } from "react-map-gl";
+import { UserButton } from "@clerk/nextjs";
 
 // Price tags only appear once you're zoomed in enough that nearby ones (UCLA/USC) don't overlap.
 const PIN_ZOOM = 10;
@@ -24,7 +25,7 @@ const HOUSE = {
 
 const usd = (n: number) => `$${n.toLocaleString()}`;
 
-// Eight-point star (Rub el Hizb), the Manara mark.
+// Eight-point star (Rub el Hizb), the Bayt Qareeb mark.
 function Star({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
@@ -61,7 +62,7 @@ export default function Home() {
         <div className="pointer-events-auto inline-flex items-center gap-3 rounded-2xl bg-ink px-4 py-3 text-white shadow-[0_8px_24px_rgba(20,33,61,0.35)]">
           <Star className="h-6 w-6 text-lantern" />
           <div>
-            <p className="font-display text-xl font-bold leading-none tracking-wide">Manara</p>
+            <p className="font-display text-xl font-bold leading-none tracking-wide">Bayt Qareeb</p>
             <p className="mt-1 text-xs text-white/70">
               {status === "loading" && "Finding rooms…"}
               {status === "error" && "Couldn't load rooms. Refresh to try again."}
@@ -70,6 +71,7 @@ export default function Home() {
                 : "Zoom in or tap a dot to see prices")}
             </p>
           </div>
+          <UserButton />
         </div>
       </header>
 
@@ -201,7 +203,7 @@ export default function Home() {
 
             <div className="sticky bottom-0 bg-white px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
               <a
-                href={`mailto:${selected.contactEmail}?subject=${encodeURIComponent("Manara: " + selected.title)}`}
+                href={`mailto:${selected.contactEmail}?subject=${encodeURIComponent("Bayt Qareeb: " + selected.title)}`}
                 className="block min-h-[48px] rounded-xl bg-ink py-3 text-center font-semibold text-white hover:bg-ink/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
               >
                 Email the lister

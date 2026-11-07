@@ -9,8 +9,12 @@ jobs:
   check:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: file:./dev.db
+      # Placeholders: the build never connects to the database or Clerk.
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      DIRECT_URL: postgresql://ci:ci@localhost:5432/ci
       NEXT_PUBLIC_MAPBOX_TOKEN: pk.ci-placeholder
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk
+      CLERK_SECRET_KEY: sk_test_ci-placeholder
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
