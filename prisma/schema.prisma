@@ -11,7 +11,8 @@ datasource db {
 // Enum-like strings are checked by scripts/validate-data.js.
 model User {
   id        String    @id @default(cuid())
-  email     String    @unique // must end in .edu
+  clerkId   String    @unique
+  email    String    @unique // must end in .edu
   name      String?
   gender    String? // BROTHER | SISTER
   createdAt DateTime  @default(now())

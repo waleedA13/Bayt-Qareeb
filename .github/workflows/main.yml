@@ -44,6 +44,13 @@ jobs:
       - name: Validate listing data
         run: npm run validate
 
+      - name: Self-checks
+        run: |
+          node scripts/check-listing-input.js
+          node scripts/check-geocode.js
+          node scripts/check-search-filters.js
+          node scripts/check-campuses.js
+
       # ponytail: report-only until we upgrade to Next 16 (all Next <16 carry an open advisory).
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=high

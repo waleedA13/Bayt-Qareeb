@@ -29,6 +29,10 @@ const appearance = {
     formFieldInput: "!min-h-[48px] !text-base",
     formButtonPrimary: "!min-h-[48px] !rounded-xl !bg-ink !text-base !font-semibold !shadow-none hover:!bg-ink/90",
     otpCodeFieldInput: "!text-ink",
+    // 44px touch targets on phones
+    footerAction: "!items-center",
+    footerActionLink: "!inline-flex !min-h-[44px] !items-center",
+    formFieldInputShowPasswordButton: "!min-h-[44px] !min-w-[44px]",
   },
 };
 
@@ -65,7 +69,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Reem+Kufi:wght@500;700&display=swap"
         />
       </head>
-      <body className="font-body text-ink antialiased">
+      <body className="bg-paper font-body text-ink antialiased">
         {!user || allowed ? children : (
           <AuthShell>
             <div className="glass w-[25rem] max-w-full rounded-3xl p-8 text-center shadow-[0_16px_40px_rgba(20,33,61,0.22)]">

@@ -57,7 +57,7 @@ export function LogoMark({ className = "h-10 w-10" }: { className?: string }) {
 
 export function Logo() {
   return (
-    <Link href="/" className="flex shrink-0 items-center gap-2.5 rounded-xl outline-none focus-visible:ring-4 focus-visible:ring-ink/25">
+    <Link href="/" className="flex min-h-[44px] shrink-0 items-center gap-2.5 rounded-xl outline-none focus-visible:ring-4 focus-visible:ring-ink/25">
       <LogoMark className="h-10 w-10 shrink-0" />
       <span className="font-display text-xl font-bold tracking-tight">Bayt Qareeb</span>
     </Link>

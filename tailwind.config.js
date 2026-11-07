@@ -1,4 +1,6 @@
 module.exports = {
+  // hover: styles only on devices that can hover, so they don't stick after a tap on phones
+  future: { hoverOnlyWhenSupported: true },
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
     extend: {

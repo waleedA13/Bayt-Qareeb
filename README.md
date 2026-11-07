@@ -89,7 +89,7 @@ cp .env.example .env
 npx prisma db push
 ```
 
-**4. Load the demo listings** (60 rooms around UCLA, USC, UC Riverside, UCSD and UC Irvine; contacts are fake `@example.edu` addresses). This deletes existing listings first.
+**4. Load the demo listings** (80 rooms around UCLA, USC, UC Riverside, UCSD, UC Irvine, UC Davis and Stanford; contacts are fake `@example.edu` addresses). This deletes existing listings first.
 ```bash
 npm run seed
 ```

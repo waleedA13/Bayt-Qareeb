@@ -12,7 +12,7 @@ export default function AuthShell({ children, aside }: { children: React.ReactNo
           <Link href="/" className="inline-flex min-h-[44px] items-center rounded-full px-4 font-semibold hover:bg-ink/5">Back to home</Link>
         </div>
       </header>
-      <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4 py-8 motion-safe:animate-fade-up">
+      <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4 py-8">
         {aside}
         {children}
       </main>
