@@ -36,8 +36,11 @@ const good = {
 const errs = (patch) => validate([{ ...good, ...patch }]).join("\n");
 assert.deepEqual(validate([good]), []);
 assert.match(errs({ lat: 37.8676, lng: -122.259 }), /within 5 miles/); // Berkeley
-assert.match(errs({ rentShare: 5000 }), /rentShare exceeds totalRent/);
-assert.match(errs({ totalRoommates: 2 }), /fewer roommates than beds/);
+// field rules come from lib/listingInput.js
+assert.match(errs({ rentShare: 5000 }), /rentShare: Your share can't be more than the total rent/);
+assert.match(errs({ totalRoommates: 2 }), /totalRoommates: Roommates can't be fewer than bedrooms/);
+assert.match(errs({ roomType: "STUDIO" }), /roomType:/);
+assert.match(errs({ title: "a".repeat(81) }), /title:/);
 assert.match(errs({ contactEmail: "yusuf@ucla.edu" }), /@example\.edu/);
 assert.match(errs({ contactEmail: "x@example.edu.ucla.edu" }), /@example\.edu/);
 assert.match(validate([good, { ...good }]).join("\n"), /duplicate title/);
