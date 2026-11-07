@@ -10,6 +10,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "1.6.0",
     "@clerk/nextjs": "6.39.8",
     "@prisma/client": "5.20.0",
     "mapbox-gl": "3.7.0",

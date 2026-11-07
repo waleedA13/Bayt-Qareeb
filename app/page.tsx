@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Map, { Marker, NavigationControl, type MapRef } from "react-map-gl";
 import { UserButton } from "@clerk/nextjs";
+import SearchBar from "@/components/SearchBar";
 
 // Price tags only appear once you're zoomed in enough that nearby ones (UCLA/USC) don't overlap.
 const PIN_ZOOM = 10;
@@ -74,6 +75,7 @@ export default function Home() {
           <UserButton />
         </div>
       </header>
+      <SearchBar onResults={setListings} />
 
       {!TOKEN ? (
         <div className="grid h-full place-items-center p-6 text-center">
