@@ -4,7 +4,7 @@ import { Logo, MapBackdrop, Star, staticMap } from "@/components/brand";
 
 // Public landing page. Signed-out visitors only ever see the static sample rooms below, never real listings.
 
-const BTN = "inline-flex min-h-[48px] items-center justify-center rounded-full px-6 font-semibold outline-none transition focus-visible:ring-4 focus-visible:ring-ink/25 active:scale-[0.98]";
+const BTN = "inline-flex min-h-[48px] select-none items-center justify-center rounded-full px-6 font-semibold outline-none [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] transition focus-visible:ring-4 focus-visible:ring-ink/25 active:scale-[0.98]";
 const PRIMARY = `${BTN} bg-ink text-white shadow-[0_8px_24px_rgba(20,33,61,0.25)] hover:bg-ink/90`;
 const GHOST = `${BTN} glass text-ink hover:bg-white`;
 const EYEBROW = "text-[13px] font-bold uppercase tracking-[0.08em] text-ink/60";
@@ -78,7 +78,7 @@ export default async function Landing() {
         </header>
 
         <section id="top" className="mx-auto grid max-w-7xl items-center gap-10 px-4 pt-12 md:px-8 md:pt-20 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
-          <div className="motion-safe:animate-fade-up">
+          <div>
             <p className="glass inline-block rounded-full px-3.5 py-1.5 text-[13px] font-semibold tracking-[0.04em]">FOR STUDENTS ON THE MOVE</p>
             <h1 className="mt-5 font-display text-[44px] font-bold leading-[1.02] tracking-tight sm:text-[56px] lg:text-[68px]">
               A new city should still feel like <span className="underline decoration-lantern decoration-[6px] underline-offset-[8px]">home.</span>
@@ -94,7 +94,7 @@ export default async function Landing() {
           </div>
 
           {/* A still of the map app: command bar, price pins and a room card */}
-          <div aria-hidden="true" className="relative mx-auto h-[360px] w-full max-w-[520px] motion-safe:animate-fade-up sm:h-[420px]" style={{ animationDelay: "120ms" }}>
+          <div aria-hidden="true" className="relative mx-auto h-[360px] w-full max-w-[520px] sm:h-[420px]">
             <div className="glass absolute inset-x-0 top-0 flex h-14 items-center gap-2 rounded-2xl pl-2 pr-3 shadow-[0_10px_30px_rgba(20,33,61,0.18)]">
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-ink"><Star className="h-5 w-5 text-white" /></span>
               <span className="truncate pl-1 text-[15px] text-ink/80">Sisters&apos; room near UCI with a halal kitchen</span>
@@ -160,13 +160,13 @@ export default async function Landing() {
               <p className={EYEBROW}>Featured rooms</p>
               <h2 className={H2}>Rooms that fit your life.</h2>
             </div>
-            <Link href={start} className="font-semibold underline underline-offset-4 hover:text-ink/70">View all rooms on the map</Link>
+            <Link href={start} className="inline-flex min-h-[44px] items-center font-semibold underline underline-offset-4 hover:text-ink/70">View all rooms on the map</Link>
           </div>
           <p className="mt-3 text-sm text-ink/60">Sample listings shown for illustration. Live rooms are on the map.</p>
           <ul className="mt-7 grid gap-5 md:grid-cols-3">
             {ROOMS.map((r) => (
               <li key={r.rent}>
-                <Link href={start} className="group block overflow-hidden rounded-3xl bg-white shadow-[0_1px_3px_rgba(20,33,61,0.1)] ring-1 ring-ink/5 outline-none transition hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(20,33,61,0.16)] focus-visible:ring-4 focus-visible:ring-ink/25">
+                <Link href={start} className="group block overflow-hidden rounded-3xl bg-white shadow-[0_1px_3px_rgba(20,33,61,0.1)] ring-1 ring-ink/5 outline-none transition active:scale-[0.99] motion-safe:hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(20,33,61,0.16)] focus-visible:ring-4 focus-visible:ring-ink/25">
                   <div className="relative h-48">
                     <img src={staticMap("satellite-streets-v12", r.at[0], r.at[1], 15.3, 480, 260, true)} alt="" loading="lazy" className="h-full w-full object-cover" />
                     <span className={`absolute left-3 top-3 ${BADGE} ${HOUSE[r.house]}`}>{r.house}</span>
@@ -262,9 +262,9 @@ export default async function Landing() {
       <footer className="mx-auto mt-16 flex max-w-7xl flex-wrap items-center justify-between gap-4 border-t border-ink/10 px-4 pb-12 pt-8 text-sm text-ink/65 md:px-8">
         <span className="font-display text-lg font-bold text-ink">Bayt Qareeb</span>
         <span>Student housing, with community built in.</span>
-        <span className="flex gap-5">
-          <a href="#faq" className="hover:text-ink">FAQ</a>
-          <Link href={userId ? "/map" : "/sign-in"} className="hover:text-ink">{userId ? "Map" : "Sign in"}</Link>
+        <span className="-mx-2 flex">
+          <a href="#faq" className="inline-flex min-h-[44px] items-center px-2 hover:text-ink">FAQ</a>
+          <Link href={userId ? "/map" : "/sign-in"} className="inline-flex min-h-[44px] items-center px-2 hover:text-ink">{userId ? "Map" : "Sign in"}</Link>
         </span>
       </footer>
     </div>
