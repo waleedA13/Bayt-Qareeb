@@ -2,6 +2,8 @@ module.exports = {
   content: ["./app/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      keyframes: { "fade-up": { from: { opacity: "0", transform: "translateY(6px)" }, to: { opacity: "1", transform: "none" } } },
+      animation: { "fade-up": "fade-up 320ms ease-out both" },
       colors: {
         ink: "#14213D",      // dusk sky
         lantern: "#E9B949",  // lamp gold
