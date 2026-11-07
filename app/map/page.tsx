@@ -29,8 +29,8 @@ const HOUSE = {
   ANY: { label: "Mixed", cls: "bg-white text-ink ring-1 ring-ink/20" },
 };
 const BADGE = "rounded-md px-2 py-0.5 text-[13px] font-semibold";
-// Listings span Westwood to La Jolla; start framed on them instead of the whole state.
-const START_BOUNDS: [[number, number], [number, number]] = [[-118.55, 32.8], [-117.15, 34.1]];
+// Listings span Davis to La Jolla; start framed on them so no campus starts off-screen.
+const START_BOUNDS: [[number, number], [number, number]] = [[-122.3, 32.8], [-117.15, 38.6]];
 // Price range filter bounds (monthly rent share). A handle at either end means "no limit".
 const PRICE_FLOOR = 0;
 const PRICE_CEIL = 3000;

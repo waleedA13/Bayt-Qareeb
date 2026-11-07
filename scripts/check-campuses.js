@@ -5,12 +5,15 @@ const { validate } = require("./validate-data");
 const c = (email) => campusForEmail(email)?.domain ?? null;
 
 // campusForEmail
-assert.equal(CAMPUSES.length, 5);
+assert.equal(CAMPUSES.length, 7);
 assert.equal(c("yusuf@ucla.edu"), "ucla.edu");
 assert.equal(c("a@usc.edu"), "usc.edu");
 assert.equal(c("a@ucr.edu"), "ucr.edu");
 assert.equal(c("a@ucsd.edu"), "ucsd.edu");
 assert.equal(c("a@uci.edu"), "uci.edu");
+assert.equal(c("a@ucdavis.edu"), "ucdavis.edu");
+assert.equal(c("a@cs.stanford.edu"), "stanford.edu");
+assert.equal(c("a@notstanford.edu"), null);
 assert.equal(c("a@eng.ucsd.edu"), "ucsd.edu"); // subdomain
 assert.equal(c("Bob@UCLA.EDU"), "ucla.edu"); // case-insensitive
 assert.equal(c("name+clerk_test@ucsd.edu"), "ucsd.edu");

@@ -602,5 +602,207 @@
     "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
     "description": "The bike path takes you straight to campus in ten minutes. Three sisters, a halal kitchen, and Sunday brunch is a house rule.",
     "contactEmail": "uci-sisters-12@example.edu"
+  },
+
+  {
+    "title": "Olive Dr room, bike under the tracks to class",
+    "address": "Olive Dr, Davis, CA",
+    "lat": 38.5410, "lng": -121.7380,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 2550, "rentShare": 850, "avgUtilities": 85,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "The Richards underpass puts you on campus in about eight minutes by bike. Three brothers, and we take turns making chai after Fajr before the first lecture.",
+    "contactEmail": "ucdavis-brothers-01@example.edu"
+  },
+  {
+    "title": "Downtown Davis shared room above the bookstore block",
+    "address": "E St, Downtown, Davis, CA",
+    "lat": 38.5440, "lng": -121.7400,
+    "roomType": "SHARED", "totalRoommates": 4, "beds": 2, "baths": 1,
+    "totalRent": 2400, "rentShare": 600, "avgUtilities": 70,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Two sisters to a room, right by the Saturday farmers market. The Unitrans bus stops a block away, or it's a ten-minute bike to the Quad.",
+    "contactEmail": "ucdavis-sisters-02@example.edu"
+  },
+  {
+    "title": "B St duplex for a sister, cat on site",
+    "address": "B St, Downtown, Davis, CA",
+    "lat": 38.5445, "lng": -121.7445,
+    "roomType": "PRIVATE", "totalRoommates": 2, "beds": 2, "baths": 1,
+    "totalRent": 2100, "rentShare": 1050, "avgUtilities": 60,
+    "petsAllowed": true, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "I'm a vet med student with a very social cat named Basbousa. The duplex is across the street from campus, so you can walk to an 8am in five minutes.",
+    "contactEmail": "ucdavis-sisters-03@example.edu"
+  },
+  {
+    "title": "Old North Davis house, separate floors",
+    "address": "F St, Old North Davis, Davis, CA",
+    "lat": 38.5490, "lng": -121.7400,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 2700, "rentShare": 900, "avgUtilities": 95,
+    "petsAllowed": true, "halalKitchen": false, "genderPref": "ANY",
+    "description": "Brothers upstairs, a sister downstairs with her own bathroom. The kitchen is shared and not halal-only. Big shady yard, and a 12-minute bike to campus.",
+    "contactEmail": "ucdavis-mixed-04@example.edu"
+  },
+  {
+    "title": "Russell Blvd room, two minutes from the Silo",
+    "address": "Russell Blvd, Central Davis, Davis, CA",
+    "lat": 38.5440, "lng": -121.7700,
+    "roomType": "PRIVATE", "totalRoommates": 4, "beds": 4, "baths": 2,
+    "totalRent": 3600, "rentShare": 900, "avgUtilities": 110,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Four brothers, all ag and engineering majors. The MSA prayer room is a short walk across Russell, which makes Dhuhr between classes easy.",
+    "contactEmail": "ucdavis-brothers-05@example.edu"
+  },
+  {
+    "title": "Sycamore Ln shared room, quiet complex",
+    "address": "Sycamore Ln, Central Davis, Davis, CA",
+    "lat": 38.5475, "lng": -121.7640,
+    "roomType": "SHARED", "totalRoommates": 4, "beds": 2, "baths": 2,
+    "totalRent": 2200, "rentShare": 550, "avgUtilities": 75,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Quiet hours are actually enforced here, which is why we picked it. You'd share with a third-year in psych. In Ramadan we break our fast together on the balcony.",
+    "contactEmail": "ucdavis-sisters-06@example.edu"
+  },
+  {
+    "title": "North Davis brothers' house near the greenbelt",
+    "address": "Anderson Rd, North Davis, Davis, CA",
+    "lat": 38.5560, "lng": -121.7570,
+    "roomType": "SHARED", "totalRoommates": 5, "beds": 3, "baths": 2,
+    "totalRent": 2900, "rentShare": 550, "avgUtilities": 120,
+    "petsAllowed": true, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Five brothers and a backyard tortoise. The greenbelt bike path takes you to campus in ten minutes without crossing a big road.",
+    "contactEmail": "ucdavis-brothers-07@example.edu"
+  },
+  {
+    "title": "West Davis room in a grad-student house",
+    "address": "Arlington Blvd, West Davis, Davis, CA",
+    "lat": 38.5520, "lng": -121.7800,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 2550, "rentShare": 850, "avgUtilities": 90,
+    "petsAllowed": false, "halalKitchen": false, "genderPref": "ANY",
+    "description": "Two PhD students, a brother and a sister, each with their own wing. The kitchen isn't halal-only, but there's a halal shelf and separate pans. Fifteen minutes by bike.",
+    "contactEmail": "ucdavis-mixed-08@example.edu"
+  },
+  {
+    "title": "Lake Blvd 2-bed for a sister",
+    "address": "Lake Blvd, West Davis, Davis, CA",
+    "lat": 38.5530, "lng": -121.7860,
+    "roomType": "PRIVATE", "totalRoommates": 2, "beds": 2, "baths": 2,
+    "totalRent": 2300, "rentShare": 1150, "avgUtilities": 65,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Own bathroom and a desk by the window. I'm a nutrition senior who meal-preps on Sundays, so the fridge is always full. The Unitrans line runs to the MU in about 15 minutes.",
+    "contactEmail": "ucdavis-sisters-09@example.edu"
+  },
+  {
+    "title": "Oak Ave room, walk to the ARC",
+    "address": "Oak Ave, Central Davis, Davis, CA",
+    "lat": 38.5470, "lng": -121.7560,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 1.5,
+    "totalRent": 2850, "rentShare": 950, "avgUtilities": 80,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "The gym is a five-minute walk and so is the Quad. Three brothers who keep the house clean and wake each other up for suhoor in Ramadan.",
+    "contactEmail": "ucdavis-brothers-10@example.edu"
+  },
+
+  {
+    "title": "College Terrace room, walk to the Oval",
+    "address": "Wellesley St, College Terrace, Palo Alto, CA",
+    "lat": 37.4215, "lng": -122.1475,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 6900, "rentShare": 2300, "avgUtilities": 120,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Fifteen-minute walk to the Oval, or five by bike. Three brothers, mostly CS. We drive together to the masjid in Santa Clara for Jumu'ah when classes allow.",
+    "contactEmail": "stanford-brothers-01@example.edu"
+  },
+  {
+    "title": "Shared room on Stanford Ave, steps from Escondido",
+    "address": "Stanford Ave, College Terrace, Palo Alto, CA",
+    "lat": 37.4195, "lng": -122.1560,
+    "roomType": "SHARED", "totalRoommates": 4, "beds": 2, "baths": 2,
+    "totalRent": 5600, "rentShare": 1400, "avgUtilities": 95,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "About the cheapest way to live this close to campus. Two sisters per room, and Escondido Village is just across the street. We do iftar with the Muslim grad students in Ramadan.",
+    "contactEmail": "stanford-sisters-02@example.edu"
+  },
+  {
+    "title": "Professorville cottage room for a sister",
+    "address": "Waverley St, Professorville, Palo Alto, CA",
+    "lat": 37.4400, "lng": -122.1550,
+    "roomType": "PRIVATE", "totalRoommates": 2, "beds": 2, "baths": 1,
+    "totalRent": 4800, "rentShare": 2400, "avgUtilities": 80,
+    "petsAllowed": true, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Small cottage behind an old shingle house, with a garden and a very calm dog. The Marguerite shuttle from downtown gets you to campus in about ten minutes.",
+    "contactEmail": "stanford-sisters-03@example.edu"
+  },
+  {
+    "title": "Downtown Palo Alto room in a mixed grad flat",
+    "address": "Bryant St, Downtown North, Palo Alto, CA",
+    "lat": 37.4470, "lng": -122.1600,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 7200, "rentShare": 2400, "avgUtilities": 110,
+    "petsAllowed": false, "halalKitchen": false, "genderPref": "ANY",
+    "description": "A brother and a sister in the GSB and the med school, each with their own bathroom. The kitchen is shared and not halal-only. Caltrain and the Marguerite are both a short walk.",
+    "contactEmail": "stanford-mixed-04@example.edu"
+  },
+  {
+    "title": "Evergreen Park shared room, four brothers",
+    "address": "Park Blvd, Evergreen Park, Palo Alto, CA",
+    "lat": 37.4280, "lng": -122.1440,
+    "roomType": "SHARED", "totalRoommates": 4, "beds": 2, "baths": 1,
+    "totalRent": 5200, "rentShare": 1300, "avgUtilities": 90,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Two brothers per room, a block from California Ave cafes for late study sessions. Someone's always up for Fajr, and it's a 12-minute bike to the engineering quad.",
+    "contactEmail": "stanford-brothers-05@example.edu"
+  },
+  {
+    "title": "Menlo Park room on Middle Ave, bike path to campus",
+    "address": "Middle Ave, Menlo Park, CA",
+    "lat": 37.4410, "lng": -122.1800,
+    "roomType": "PRIVATE", "totalRoommates": 4, "beds": 4, "baths": 2,
+    "totalRent": 8400, "rentShare": 2100, "avgUtilities": 140,
+    "petsAllowed": true, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "Four brothers and a cat in a ranch house with a big kitchen. The Middle Ave bike bridge drops you onto campus in ten minutes. We grill on weekends, halal only.",
+    "contactEmail": "stanford-brothers-06@example.edu"
+  },
+  {
+    "title": "Santa Cruz Ave apartment for two sisters",
+    "address": "Santa Cruz Ave, Menlo Park, CA",
+    "lat": 37.4520, "lng": -122.1830,
+    "roomType": "PRIVATE", "totalRoommates": 2, "beds": 2, "baths": 2,
+    "totalRent": 5000, "rentShare": 2500, "avgUtilities": 75,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Own bathroom, and the downtown Menlo Park shops are below us. I'm a bioengineering PhD student, out by 8 and home by Maghrib. Twenty minutes to campus by bike.",
+    "contactEmail": "stanford-sisters-07@example.edu"
+  },
+  {
+    "title": "Oak Grove Ave shared room, Caltrain close by",
+    "address": "Oak Grove Ave, Menlo Park, CA",
+    "lat": 37.4540, "lng": -122.1790,
+    "roomType": "SHARED", "totalRoommates": 4, "beds": 2, "baths": 2,
+    "totalRent": 4800, "rentShare": 1200, "avgUtilities": 85,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Two shared rooms, each with its own bathroom. Menlo Park Caltrain is a few minutes away for weekend trips to the halal markets in Fremont.",
+    "contactEmail": "stanford-sisters-08@example.edu"
+  },
+  {
+    "title": "East Palo Alto room, lower rent, longer ride",
+    "address": "Euclid Ave, East Palo Alto, CA",
+    "lat": 37.4625, "lng": -122.1410,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 1,
+    "totalRent": 5400, "rentShare": 1800, "avgUtilities": 100,
+    "petsAllowed": true, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "The lowest rent we've found for a private room near Stanford. The trade-off is a 25-minute bike ride to campus. Three brothers and a friendly dog.",
+    "contactEmail": "stanford-brothers-09@example.edu"
+  },
+  {
+    "title": "Midtown Palo Alto house, mixed, separate entrances",
+    "address": "Colorado Ave, Midtown, Palo Alto, CA",
+    "lat": 37.4300, "lng": -122.1300,
+    "roomType": "PRIVATE", "totalRoommates": 2, "beds": 2, "baths": 2,
+    "totalRent": 4400, "rentShare": 2200, "avgUtilities": 85,
+    "petsAllowed": false, "halalKitchen": false, "genderPref": "ANY",
+    "description": "Main house plus a converted garage unit with its own door. A sister lives in the main house now. The shared kitchen isn't halal-only. Bryant St bike boulevard to campus in 15 minutes.",
+    "contactEmail": "stanford-mixed-10@example.edu"
   }
 ]
