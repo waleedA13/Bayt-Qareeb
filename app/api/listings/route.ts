@@ -1,8 +1,10 @@
-import { prisma } from "@/lib/db";
+import seedListings from "@/prisma/seed-data.json";
 
-export const dynamic = "force-dynamic";
+const listings = seedListings.map((listing, index) => ({
+  id: `placeholder-${index + 1}`,
+  ...listing,
+}));
 
 export async function GET() {
-  const listings = await prisma.listing.findMany();
   return Response.json(listings);
 }
