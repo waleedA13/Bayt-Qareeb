@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Map, { Marker, NavigationControl, type MapRef } from "react-map-gl";
-import { UserButton } from "@clerk/nextjs";
+import { UserButton, useUser } from "@clerk/nextjs";
+import { campusForEmail } from "@/lib/campuses";
 
 // Full-bleed map with frosted-glass UI floating on top (search + filter pills, results panel),
 // two base colors (white + navy ink) and one accent (gold) for the active pin and "Contact lister".
@@ -28,7 +29,8 @@ const HOUSE = {
   ANY: { label: "Mixed", cls: "bg-white text-ink ring-1 ring-ink/20" },
 };
 const BADGE = "rounded-md px-2 py-0.5 text-[13px] font-semibold";
-const START_BOUNDS: [[number, number], [number, number]] = [[-122.6, 33.8], [-117.9, 38.1]];
+// Listings span Westwood to La Jolla; start framed on them instead of the whole state.
+const START_BOUNDS: [[number, number], [number, number]] = [[-118.55, 32.8], [-117.15, 34.1]];
 // Price range filter bounds (monthly rent share). A handle at either end means "no limit".
 const PRICE_FLOOR = 0;
 const PRICE_CEIL = 3000;
@@ -81,6 +83,10 @@ export default function Home() {
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
   const [preview, setPreview] = useState<Listing | null>(null);
   const isDesktop = () => typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+  // Start the map on the student's own campus (verified email only, same rule as lib/auth.ts).
+  const { user, isLoaded } = useUser();
+  const email = user?.primaryEmailAddress;
+  const campus = email?.verification?.status === "verified" ? campusForEmail(email.emailAddress) : null;
 
   // Filters
   const [query, setQuery] = useState("");
@@ -231,14 +237,17 @@ export default function Home() {
               <code className="rounded bg-white px-1"> .env</code> and restart the dev server.
             </p>
           </div>
-        ) : (
+        ) : isLoaded && (
+          // initialViewState is read once, so wait for Clerk to know the campus before mounting.
           <Map
             ref={mapRef}
             mapboxAccessToken={TOKEN}
-            onLoad={syncBounds}
+            onLoad={(e) => { syncBounds(); setShowPrices(e.target.getZoom() >= PIN_ZOOM); }}
             onZoom={(e) => setShowPrices(e.viewState.zoom >= PIN_ZOOM)}
             onMoveEnd={syncBounds}
-            initialViewState={{ bounds: START_BOUNDS, fitBoundsOptions: { padding: { top: 150, bottom: 40, left: 40, right: padRight } } }}
+            initialViewState={campus
+              ? { longitude: campus.lng, latitude: campus.lat, zoom: 12.5, padding: { top: 150, bottom: 40, left: 40, right: padRight } }
+              : { bounds: START_BOUNDS, fitBoundsOptions: { padding: { top: 150, bottom: 40, left: 40, right: padRight } } }}
             style={{ width: "100%", height: "100%" }}
             mapStyle="mapbox://styles/mapbox/light-v11"
             onClick={() => { setSelected(null); setPreview(null); }}
@@ -349,6 +358,12 @@ export default function Home() {
           )}
         </div>
 
+        {campus && !placed && !aiNote && !isSentence(query) && (
+          <p className="glass pointer-events-auto hidden items-center gap-1.5 self-start rounded-full px-3 py-1.5 text-sm font-semibold md:flex">
+            <Svg d={<path d="M12 21s-6-5.3-6-10a6 6 0 1112 0c0 4.7-6 10-6 10zM12 9.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" />} />
+            Near {campus.name}
+          </p>
+        )}
         {!aiNote && !asking && isSentence(query) && (
           <p className="glass pointer-events-auto self-start rounded-full px-3 py-1.5 text-sm font-medium">
             Press <kbd className="rounded bg-ink/10 px-1.5 font-sans">Enter</kbd> to search with AI and jump to the place
