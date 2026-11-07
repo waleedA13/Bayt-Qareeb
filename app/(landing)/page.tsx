@@ -130,7 +130,7 @@ export default async function Landing() {
         {/* TRUST STRIP */}
         <section className="mx-auto mt-14 max-w-7xl px-4 md:mt-20 md:px-8">
           <ul className="glass flex flex-wrap justify-between gap-x-10 gap-y-3 rounded-2xl px-6 py-5 text-[15px] font-semibold shadow-[0_10px_30px_rgba(20,33,61,0.1)]">
-            {["Verified .edu listers", "Brothers, sisters and mixed houses", "Halal-kitchen filter", "Rooms across Southern California"].map((t) => (
+            {["Verified .edu listers", "Brothers, sisters and mixed houses", "Halal-kitchen filter", "Near UCLA, USC, UCR, UCSD and UCI"].map((t) => (
               <li key={t} className="flex items-center gap-2"><Star className="h-3.5 w-3.5 text-lantern" />{t}</li>
             ))}
           </ul>
