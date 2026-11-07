@@ -10,7 +10,8 @@ export const viewport = { width: "device-width", initialScale: 1 };
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const user = await currentUser();
   return (
-    <ClerkProvider>
+    // Vercel warns on NEXT_PUBLIC_* names containing KEY, so the key is passed in by hand.
+    <ClerkProvider publishableKey={process.env.NEXT_CLERK_PUBLISHABLE_KEY}>
     <html lang="en">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
