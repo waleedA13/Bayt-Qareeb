@@ -1,0 +1,3 @@
+# Fake Clerk publishable key used as a CI build placeholder (decodes to example.clerk.accounts.dev), not a real secret.
+13c5f47170d4489c912b14e29e8aa0408021b880:.github/workflows/main.yml:generic-api-key:16
+efb467fa881ac172cbf8f1b3c0d7b0fc0012096e:.github/workflows/main.yml:generic-api-key:16
