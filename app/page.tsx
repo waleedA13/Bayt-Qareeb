@@ -14,7 +14,7 @@ type Listing = {
   description?: string; contactEmail: string;
 };
 
-const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+const TOKEN = process.env.NEXT_MAPBOX_TOKEN;
 
 const HOUSE = {
   BROTHERS: { label: "Brothers' house", cls: "bg-brothers text-white" },
@@ -76,7 +76,7 @@ export default function Home() {
       {!TOKEN ? (
         <div className="grid h-full place-items-center p-6 text-center">
           <p className="max-w-sm text-ink/80">
-            The map needs a Mapbox token. Add <code className="rounded bg-white px-1">NEXT_PUBLIC_MAPBOX_TOKEN</code> to
+            The map needs a Mapbox token. Add <code className="rounded bg-white px-1">NEXT_MAPBOX_TOKEN</code> to
             <code className="rounded bg-white px-1"> .env</code> and restart the dev server.
           </p>
         </div>
