@@ -40,7 +40,7 @@ export default function SearchBar({ onResults }: { onResults: (listings: any[], 
   }
 
   return (
-    <div className="absolute left-4 top-24 z-10 w-[min(28rem,calc(100vw-2rem))] rounded-xl bg-white/95 p-2 shadow-lg">
+    <div className="absolute left-4 top-4 z-10 w-[min(28rem,calc(100vw-2rem))] rounded-xl bg-white/95 p-2 shadow-lg">
       <form onSubmit={submit} className="flex gap-2">
         <input
           value={query}
