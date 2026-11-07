@@ -20,11 +20,15 @@ type Sort = "price-asc" | "price-desc" | "roommates";
 const TOKEN = process.env.NEXT_MAPBOX_TOKEN;
 const PIN_ZOOM = 10;
 
+// Two base colors (white + navy ink) do the work; gold is reserved for the active pin and "Contact lister".
 const HOUSE = {
-  BROTHERS: { label: "Brothers", cls: "bg-brothers text-white" },
-  SISTERS: { label: "Sisters", cls: "bg-sisters text-white" },
-  ANY: { label: "Mixed", cls: "bg-paper text-ink ring-1 ring-ink/15" },
+  BROTHERS: { label: "Brothers", cls: "bg-white text-brothers ring-1 ring-brothers/25" },
+  SISTERS: { label: "Sisters", cls: "bg-white text-sisters ring-1 ring-sisters/25" },
+  ANY: { label: "Mixed", cls: "bg-white text-ink ring-1 ring-ink/20" },
 };
+const BADGE = "rounded-md px-2 py-0.5 text-[13px] font-semibold";
+// Listings span the Bay Area to LA; start framed on them instead of the whole state.
+const START_BOUNDS: [[number, number], [number, number]] = [[-122.6, 33.8], [-117.9, 38.1]];
 
 const usd = (n: number) => `$${n.toLocaleString()}`;
 const short = (n: number) => (n >= 1000 ? `$${(n / 1000).toFixed(n % 1000 ? 1 : 0)}K` : `$${n}`);
@@ -47,7 +51,7 @@ export default function Home() {
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
   // Mobile map: tapping a pin shows a small preview card first (like Zillow), tap it for details.
   const [preview, setPreview] = useState<Listing | null>(null);
-  const isDesktop = () => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
+  const isDesktop = () => typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
 
   // Filters
   const [query, setQuery] = useState("");
@@ -124,7 +128,7 @@ export default function Home() {
         <div className="flex items-center gap-3 px-4 py-2.5 sm:gap-4 sm:px-6 sm:py-3">
           <div className="flex shrink-0 items-center gap-2">
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-ink">
-              <Star className="h-5 w-5 text-lantern" />
+              <Star className="h-5 w-5 text-white" />
             </span>
             <span className="hidden font-display text-xl font-bold tracking-wide sm:block">Manara</span>
           </div>
@@ -135,7 +139,7 @@ export default function Home() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Address, campus, or neighborhood"
-              className="h-11 w-full rounded-full sm:rounded-lg border border-ink/20 bg-white pl-4 pr-11 text-[15px] outline-none transition placeholder:text-ink/45 focus:border-ink focus:ring-2 focus:ring-ink/15"
+              className="h-11 w-full rounded-full sm:rounded-lg border border-ink/20 bg-white pl-4 pr-11 text-[15px] outline-none transition placeholder:text-ink/60 focus:border-ink focus:ring-2 focus:ring-ink/15"
             />
             <svg viewBox="0 0 24 24" className="pointer-events-none absolute right-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-ink/60" aria-hidden="true">
               <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" fill="none" />
@@ -164,7 +168,7 @@ export default function Home() {
           <Chip on={halalOnly} onClick={() => setHalalOnly((v) => !v)}>Halal kitchen</Chip>
           <Chip on={petsOnly} onClick={() => setPetsOnly((v) => !v)}>Pets OK</Chip>
           {activeFilters > 0 && (
-            <button onClick={clearFilters} className="ml-1 h-9 shrink-0 px-2 text-sm font-semibold text-brothers hover:underline">
+            <button onClick={clearFilters} className="ml-1 h-9 shrink-0 px-2 text-sm font-semibold underline underline-offset-2 [@media(pointer:coarse)]:h-11">
               Reset ({activeFilters})
             </button>
           )}
@@ -191,12 +195,12 @@ export default function Home() {
               onLoad={syncBounds}
               onZoom={(e) => setShowPrices(e.viewState.zoom >= PIN_ZOOM)}
               onMoveEnd={syncBounds}
-              initialViewState={{ longitude: -120.5, latitude: 36.0, zoom: 5.3 }}
+              initialViewState={{ bounds: START_BOUNDS, fitBoundsOptions: { padding: 48 } }}
               style={{ width: "100%", height: "100%" }}
               mapStyle="mapbox://styles/mapbox/streets-v12"
               onClick={() => { setSelected(null); setPreview(null); }}
             >
-              <div className="hidden lg:block"><NavigationControl position="top-right" showCompass={false} /></div>
+              <div className="hidden md:block"><NavigationControl position="top-right" showCompass={false} /></div>
               {filtered.map((l) => {
                 const active = selected?.id === l.id || preview?.id === l.id || hovered === l.id;
                 return (
@@ -223,14 +227,14 @@ export default function Home() {
                         onMouseLeave={() => setHovered(null)}
                         aria-label={`${l.title}, ${usd(l.rentShare)} a month`}
                         aria-pressed={active}
-                        className={`relative rounded-md px-2 py-1 text-[13px] font-bold shadow-[0_2px_6px_rgba(20,33,61,0.35)] outline-none transition-all duration-150 focus-visible:ring-4 focus-visible:ring-ink/30 ${
-                          active ? "scale-110 bg-ink text-white" : "bg-brothers text-white hover:scale-105"
+                        className={`relative rounded-md px-2.5 py-1.5 text-[14px] font-bold shadow-[0_2px_6px_rgba(20,33,61,0.35)] outline-none transition-transform duration-150 ease-out focus-visible:ring-4 focus-visible:ring-ink/30 ${
+                          active ? "scale-110 bg-lantern text-ink" : "bg-ink text-white"
                         }`}
                       >
                         {short(l.rentShare)}
                         <span
                           aria-hidden="true"
-                          className={`absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 ${active ? "bg-ink" : "bg-brothers"}`}
+                          className={`absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 ${active ? "bg-lantern" : "bg-ink"}`}
                         />
                       </button>
                     ) : (
@@ -240,7 +244,7 @@ export default function Home() {
                       >
                         <span
                           className={`rounded-full ring-2 ring-white shadow transition-all ${
-                            active ? "h-4 w-4 bg-ink" : "h-3 w-3 bg-brothers"
+                            active ? "h-4 w-4 bg-lantern" : "h-3.5 w-3.5 bg-ink"
                           }`}
                         />
                       </button>
@@ -251,7 +255,7 @@ export default function Home() {
             </Map>
           )}
           {TOKEN && !showPrices && status === "ready" && (
-            <p className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-white/95 px-4 py-2 text-sm font-medium shadow-md">
+            <p className="glass pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold shadow-md">
               Zoom in to see prices
             </p>
           )}
@@ -260,24 +264,29 @@ export default function Home() {
         {/* Results list */}
         <section
           aria-label="Rooms"
-          className={`absolute inset-0 z-10 min-h-0 w-full overflow-y-auto overscroll-contain bg-white transition-opacity duration-200 lg:static lg:z-auto lg:w-[640px] lg:border-l lg:border-ink/10 lg:opacity-100 xl:w-[760px] ${
-            mobileView === "list" ? "opacity-100" : "pointer-events-none opacity-0 lg:pointer-events-auto"
+          className={`absolute inset-0 z-10 min-h-0 w-full overflow-y-auto overscroll-contain bg-white transition-opacity duration-200 md:static md:z-auto md:w-1/2 md:shrink-0 md:border-l md:border-ink/10 md:opacity-100 xl:w-[45%] 2xl:w-[40%] ${
+            mobileView === "list" ? "opacity-100" : "pointer-events-none opacity-0 md:pointer-events-auto"
           }`}
         >
-          <div className="px-4 pb-24 pt-4 sm:px-6">
+          <div className="px-4 pb-28 pt-4 sm:px-6 md:pb-8">
             <h1 className="text-lg font-bold sm:text-xl">Student rooms for rent</h1>
             <div className="mt-1 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
               <p className="min-w-0 truncate text-sm text-ink/65">
                 {status === "loading" && "Finding rooms…"}
                 {status === "error" && "Couldn't load rooms. Refresh to try again."}
-                {status === "ready" && `${inView.length} ${inView.length === 1 ? "room" : "rooms"} from verified .edu students`}
+                {status === "ready" && (
+                  <>
+                    {inView.length} {inView.length === 1 ? "room" : "rooms"}
+                    <span className="hidden sm:inline md:hidden xl:inline"> from verified .edu students</span>
+                  </>
+                )}
               </p>
               <label className="flex items-center gap-1.5 text-sm">
                 <span className="hidden text-ink/65 sm:inline">Sort:</span>
                 <select
                   value={sort}
                   onChange={(e) => setSort(e.target.value as Sort)}
-                  className="cursor-pointer bg-transparent font-semibold text-brothers outline-none"
+                  className="-mr-2 min-h-[44px] cursor-pointer rounded-lg bg-transparent px-2 font-semibold underline underline-offset-2 outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
                 >
                   <option value="price-asc">Price ↑</option>
                   <option value="price-desc">Price ↓</option>
@@ -287,9 +296,9 @@ export default function Home() {
             </div>
 
             {status === "loading" && (
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div className="mt-4 grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr))]">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="h-64 animate-pulse rounded-xl bg-paper" />
+                  <div key={i} className="aspect-[4/3] animate-pulse rounded-2xl bg-paper" />
                 ))}
               </div>
             )}
@@ -304,20 +313,22 @@ export default function Home() {
               </div>
             )}
 
-            <ul className="mt-4 grid gap-5 sm:grid-cols-2 sm:gap-4">
-              {inView.map((l) => (
-                <li key={l.id}>
+            {/* Cards size by percentage of the panel: 1 column on phones, 2+ as the panel widens. */}
+            <ul className="mt-4 grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr))]">
+              {inView.map((l, i) => (
+                <li key={l.id} className="motion-safe:animate-fade-up" style={{ animationDelay: `${i * 40}ms` }}>
                   <article
                     ref={(el) => { cardRefs.current[l.id] = el; }}
                     onMouseEnter={() => setHovered(l.id)}
                     onMouseLeave={() => setHovered(null)}
-                    className={`group overflow-hidden rounded-xl bg-white shadow-[0_1px_3px_rgba(20,33,61,0.15)] ring-1 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(20,33,61,0.18)] ${
-                      selected?.id === l.id ? "ring-2 ring-brothers" : "ring-ink/10"
+                    className={`group overflow-hidden rounded-2xl bg-white shadow-[0_1px_3px_rgba(20,33,61,0.15)] ring-1 transition-shadow duration-200 hover:shadow-[0_8px_24px_rgba(20,33,61,0.18)] ${
+                      selected?.id === l.id || hovered === l.id ? "ring-2 ring-ink" : "ring-ink/10"
                     }`}
                   >
-                    <button onClick={() => openListing(l)} className="block w-full text-left outline-none focus-visible:ring-4 focus-visible:ring-ink/30">
-                      <CardCover listing={l} />
-                      <div className="p-3.5">
+                    <button onClick={() => openListing(l)} className="flex w-full text-left outline-none focus-visible:ring-4 focus-visible:ring-ink/30 sm:block">
+                      <CardCover listing={l} compact />
+                      <div className="min-w-0 flex-1 p-3.5">
+                        <span className={`mb-2 inline-block sm:hidden ${BADGE} ${HOUSE[l.genderPref].cls}`}>{HOUSE[l.genderPref].label}</span>
                         <p className="text-2xl font-bold leading-none">
                           {usd(l.rentShare)}<span className="text-base font-medium text-ink/60">/mo</span>
                         </p>
@@ -326,7 +337,8 @@ export default function Home() {
                           <span className="text-ink/30">|</span> {l.roomType === "PRIVATE" ? "Private room" : "Shared room"}
                           <span className="text-ink/60"> · {l.totalRoommates} roommates</span>
                         </p>
-                        <p className="mt-1 truncate text-sm text-ink/65">{l.address}</p>
+                        <p className="mt-1 truncate text-sm text-ink/70">{l.address}</p>
+                        <Lister email={l.contactEmail} />
                       </div>
                     </button>
                   </article>
@@ -338,23 +350,23 @@ export default function Home() {
 
         {/* Mobile map preview card */}
         <div
-          className={`absolute inset-x-3 bottom-20 z-20 transition-all duration-300 ease-out lg:hidden ${
+          className={`absolute inset-x-3 bottom-20 z-20 transition-all duration-300 ease-out md:hidden ${
             preview && mobileView === "map" ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-6 opacity-0"
           }`}
         >
           {preview && (
             <button
               onClick={() => { setSelected(preview); setPreview(null); }}
-              className="flex w-full overflow-hidden rounded-xl bg-white text-left shadow-[0_8px_30px_rgba(20,33,61,0.3)]"
+              className="glass flex w-full overflow-hidden rounded-2xl text-left shadow-[0_8px_30px_rgba(20,33,61,0.3)]"
             >
-              <div className="relative w-28 shrink-0 bg-ink">
-                <Star className="absolute bottom-3 left-3 h-6 w-6 text-lantern" />
+              <div className="relative w-24 shrink-0 overflow-hidden bg-ink">
+                <Star className="absolute -bottom-4 -right-4 h-20 w-20 text-white/10" />
               </div>
               <div className="min-w-0 flex-1 p-3">
                 <p className="text-xl font-bold leading-none">{usd(preview.rentShare)}<span className="text-sm font-medium text-ink/60">/mo</span></p>
                 <p className="mt-1.5 text-sm"><b>{preview.beds}</b> bd · <b>{preview.baths}</b> ba · {preview.roomType === "PRIVATE" ? "Private" : "Shared"}</p>
-                <p className="mt-0.5 truncate text-sm text-ink/65">{preview.address}</p>
-                <span className={`mt-1.5 inline-block rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${HOUSE[preview.genderPref].cls}`}>{HOUSE[preview.genderPref].label}</span>
+                <p className="mt-0.5 truncate text-sm text-ink/70">{preview.address}</p>
+                <span className={`mt-1.5 inline-block ${BADGE} ${HOUSE[preview.genderPref].cls}`}>{HOUSE[preview.genderPref].label}</span>
               </div>
             </button>
           )}
@@ -363,7 +375,7 @@ export default function Home() {
         {/* Mobile list/map toggle */}
         <button
           onClick={() => { setMobileView((v) => (v === "list" ? "map" : "list")); setPreview(null); }}
-          className={`absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(20,33,61,0.35)] transition active:scale-95 lg:hidden ${
+          className={`absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(20,33,61,0.35)] transition active:scale-95 md:hidden ${
             selected ? "pointer-events-none opacity-0" : ""
           }`}
         >
@@ -388,20 +400,22 @@ export default function Home() {
           aria-modal="true"
           aria-label="Room details"
           aria-hidden={!selected}
-          className={`fixed inset-x-0 bottom-0 top-0 z-50 w-full overflow-y-auto overscroll-contain bg-white shadow-[-12px_0_40px_rgba(20,33,61,0.25)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:absolute sm:left-auto sm:w-[520px] ${
-            selected ? "translate-y-0 sm:translate-x-0" : "pointer-events-none translate-y-full sm:translate-y-0 sm:translate-x-full"
+          className={`fixed inset-x-0 bottom-0 top-0 z-50 w-full overflow-y-auto overscroll-contain bg-white transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:absolute sm:left-auto sm:w-[min(520px,90%)] ${
+            selected
+              ? "translate-y-0 shadow-[-12px_0_40px_rgba(20,33,61,0.25)] sm:translate-x-0"
+              : "pointer-events-none invisible translate-y-full sm:translate-y-0 sm:translate-x-full"
           }`}
         >
           {selected && (
             <div className="flex min-h-full flex-col">
               <div className="sticky top-0 z-10 flex items-center justify-between border-b border-ink/10 bg-white/95 px-5 py-2.5 backdrop-blur">
-                <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${HOUSE[selected.genderPref].cls}`}>
+                <span className={`${BADGE} ${HOUSE[selected.genderPref].cls}`}>
                   {HOUSE[selected.genderPref].label} house
                 </span>
                 <button
                   onClick={() => setSelected(null)}
                   aria-label="Close room details"
-                  className="grid h-10 w-10 place-items-center rounded-full hover:bg-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink"
+                  className="grid h-11 w-11 place-items-center rounded-full hover:bg-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink"
                 >
                   <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
                     <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -464,7 +478,7 @@ export default function Home() {
                 </div>
                 <a
                   href={`mailto:${selected.contactEmail}?subject=${encodeURIComponent("Manara: " + selected.title)}`}
-                  className="block flex-1 rounded-lg bg-brothers py-3.5 text-center font-semibold text-white transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+                  className="block flex-1 rounded-lg bg-lantern py-3.5 text-center font-bold text-ink transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
                 >
                   Contact lister
                 </a>
@@ -480,18 +494,13 @@ export default function Home() {
 }
 
 // No photos in the data yet, so cards get a branded cover with the key badges.
-function CardCover({ listing: l, tall }: { listing: Listing; tall?: boolean }) {
+function CardCover({ listing: l, tall, compact }: { listing: Listing; tall?: boolean; compact?: boolean }) {
   return (
-    <div className={`relative overflow-hidden bg-ink ${tall ? "h-56" : "h-48 sm:h-40"}`}>
-      <Star className="absolute -right-6 -top-6 h-40 w-40 text-white/5 transition-transform duration-500 group-hover:rotate-45" />
-      <Star className="absolute bottom-4 left-4 h-8 w-8 text-lantern" />
-      <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
-        <span className={`rounded px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${HOUSE[l.genderPref].cls}`}>
-          {HOUSE[l.genderPref].label}
-        </span>
-        {l.halalKitchen && (
-          <span className="rounded bg-white px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-ink">Halal kitchen</span>
-        )}
+    <div className={`relative shrink-0 overflow-hidden bg-ink ${tall ? "aspect-[16/8]" : compact ? "w-[28%] sm:w-auto sm:aspect-[16/7]" : "aspect-[16/7]"}`}>
+      <Star className="absolute -bottom-10 -right-8 h-40 w-40 text-white/[0.07]" />
+      <div className={`absolute left-3 top-3 flex-wrap gap-1.5 ${compact ? "hidden sm:flex" : "flex"}`}>
+        <span className={`${BADGE} ${HOUSE[l.genderPref].cls}`}>{HOUSE[l.genderPref].label}</span>
+        {l.halalKitchen && <span className={`${BADGE} bg-white text-ink`}>Halal kitchen</span>}
       </div>
     </div>
   );
@@ -502,7 +511,7 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
     <button
       onClick={onClick}
       aria-pressed={on}
-      className={`h-9 shrink-0 rounded-lg border px-3.5 text-sm font-semibold transition-colors ${
+      className={`h-9 shrink-0 rounded-lg border px-3.5 [@media(pointer:coarse)]:h-11 text-sm font-semibold transition-colors ${
         on ? "border-ink bg-ink text-white" : "border-ink/25 bg-white hover:border-ink"
       }`}
     >
@@ -520,7 +529,7 @@ function Select({ label, value, onChange, options, active }: {
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`h-9 cursor-pointer appearance-none rounded-lg border pl-3.5 pr-8 text-sm font-semibold outline-none transition-colors ${
+        className={`h-9 cursor-pointer appearance-none [@media(pointer:coarse)]:h-11 rounded-lg border pl-3.5 pr-8 text-sm font-semibold outline-none transition-colors ${
           active ? "border-ink bg-ink text-white" : "border-ink/25 bg-white hover:border-ink"
         }`}
       >
@@ -564,3 +573,13 @@ function Rule({ ok, yes, no }: { ok: boolean; yes: string; no: string }) {
   );
 }
 
+// Trust signal: show which campus verified the lister (from their .edu domain).
+function Lister({ email }: { email: string }) {
+  const domain = email.split("@")[1] ?? "";
+  return (
+    <p className="mt-3 flex items-center gap-2 border-t border-ink/10 pt-3 text-sm">
+      <span className="grid h-7 w-7 place-items-center rounded-full bg-paper font-semibold uppercase">{email[0]}</span>
+      <span className="min-w-0 truncate text-ink/70">Verified at <b className="text-ink">{domain}</b></span>
+    </p>
+  );
+}
