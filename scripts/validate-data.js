@@ -1,5 +1,6 @@
 // Fails CI if seed data has outliers or missing fields.
 const { CAMPUSES, milesBetween } = require("../lib/campuses");
+const { validateListing } = require("../lib/listingInput");
 
 const MAX_MILES = 5;
 
@@ -9,19 +10,14 @@ function validate(listings) {
   const titles = new Set();
   listings.forEach((l, i) => {
     const tag = `#${i} "${l.title ?? "untitled"}"`;
+    // Same field rules as posted listings (money, enums, ranges, text lengths).
+    const v = validateListing(l);
+    if (!v.ok) for (const [field, msg] of Object.entries(v.errors)) errors.push(`${tag}: ${field}: ${msg}`);
+    // Seed-only rules: seed rows carry their own coordinates, sit near a campus, and use fake contacts.
     if (typeof l.lat !== "number" || typeof l.lng !== "number") errors.push(`${tag}: missing lat/lng`);
     else if (Math.abs(l.lat) > 90 || Math.abs(l.lng) > 180) errors.push(`${tag}: invalid coordinates`);
     else if (!CAMPUSES.some((c) => milesBetween(c, l) <= MAX_MILES)) errors.push(`${tag}: not within ${MAX_MILES} miles of a campus`);
-    for (const f of ["totalRent", "rentShare", "avgUtilities"]) {
-      if (typeof l[f] !== "number") errors.push(`${tag}: ${f} missing`);
-      else if (l[f] < 0) errors.push(`${tag}: ${f} is negative`);
-      else if (l[f] > 10000) errors.push(`${tag}: ${f} > $10,000`);
-    }
-    if (l.rentShare > l.totalRent) errors.push(`${tag}: rentShare exceeds totalRent`);
-    if (l.totalRoommates < l.beds) errors.push(`${tag}: fewer roommates than beds`);
-    if (!["PRIVATE", "SHARED"].includes(l.roomType)) errors.push(`${tag}: bad roomType`);
-    if (!["BROTHERS", "SISTERS", "ANY"].includes(l.genderPref)) errors.push(`${tag}: bad genderPref`);
-    // Seed contacts must be fake so no real student gets emailed.
+    // Seed contacts must be fake so no real student gets emailed. (Posted listings use the owner's verified email.)
     if (!/^[^\s@]+@example\.edu$/i.test(l.contactEmail ?? "")) errors.push(`${tag}: contactEmail must end in @example.edu`);
     const key = String(l.title ?? "").trim().toLowerCase();
     if (titles.has(key)) errors.push(`${tag}: duplicate title`);

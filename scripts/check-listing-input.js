@@ -53,6 +53,9 @@ assert.ok(err({ totalRoommates: 0 }).totalRoommates);
 assert.ok(err({ totalRoommates: 21 }).totalRoommates);
 assert.ok(err({ beds: 2.5 }).beds);
 assert.ok(err({ beds: -1 }).beds);
+// from validate-data.js: at least one roommate per bedroom (studios have 0 beds)
+assert.ok(err({ totalRoommates: 2, beds: 3 }).totalRoommates);
+assert.equal(v({ ...good, totalRoommates: 1, beds: 0 }).ok, true);
 // baths in 0.5 steps
 assert.ok(err({ baths: 1.25 }).baths);
 assert.ok(err({ baths: 0 }).baths);

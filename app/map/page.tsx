@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Map, { Marker, NavigationControl, type MapRef } from "react-map-gl";
+import Link from "next/link";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { campusForEmail } from "@/lib/campuses";
 
@@ -13,7 +14,7 @@ type Listing = {
   roomType: "PRIVATE" | "SHARED"; totalRoommates: number; beds: number; baths: number;
   totalRent: number; rentShare: number; avgUtilities: number;
   petsAllowed: boolean; halalKitchen: boolean; genderPref: "BROTHERS" | "SISTERS" | "ANY";
-  description?: string; contactEmail: string;
+  description?: string; contactEmail: string; ownerId: string | null;
 };
 
 type Bounds = { w: number; s: number; e: number; n: number } | null;
@@ -64,6 +65,7 @@ const Icon = {
   check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
   sort: <path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4" />,
   close: <path d="M6 6l12 12M18 6L6 18" />,
+  plus: <path d="M12 5v14M5 12h14" />,
 };
 function Svg({ d, className = "h-4 w-4" }: { d: React.ReactNode; className?: string }) {
   return (
@@ -115,6 +117,15 @@ export default function Home() {
       .then((d: Listing[]) => { setListings(d); setStatus("ready"); })
       .catch(() => setStatus("error"));
   }, []);
+
+  // /map?listing=<id> (from "See on map" and after posting) opens that listing once the map and data are in.
+  const [mapReady, setMapReady] = useState(false);
+  useEffect(() => {
+    if (!mapReady || status !== "ready") return;
+    const id = new URLSearchParams(window.location.search).get("listing");
+    const l = id && listings.find((x) => x.id === id);
+    if (l) openListing(l);
+  }, [mapReady, status]); // runs once both are ready; listings is set in the same update as status
 
   useEffect(() => {
     document.body.style.overflow = selected ? "hidden" : "";
@@ -242,7 +253,7 @@ export default function Home() {
           <Map
             ref={mapRef}
             mapboxAccessToken={TOKEN}
-            onLoad={(e) => { syncBounds(); setShowPrices(e.target.getZoom() >= PIN_ZOOM); }}
+            onLoad={(e) => { syncBounds(); setShowPrices(e.target.getZoom() >= PIN_ZOOM); setMapReady(true); }}
             onZoom={(e) => setShowPrices(e.viewState.zoom >= PIN_ZOOM)}
             onMoveEnd={syncBounds}
             initialViewState={campus
@@ -329,8 +340,21 @@ export default function Home() {
             <Svg d={Icon.spark} className={`h-4 w-4 ${asking ? "motion-safe:animate-spin" : ""}`} />
             <span className="hidden sm:inline">{asking ? "Thinking…" : "Ask"}</span>
           </button>
+          <Link
+            href="/listings/new"
+            aria-label="Post a room"
+            className="flex h-11 shrink-0 items-center gap-1.5 rounded-xl bg-lantern px-3 text-sm font-bold text-ink transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+          >
+            <Svg d={Icon.plus} className="h-4 w-4" />
+            <span className="hidden md:inline">Post a room</span>
+          </Link>
           <div className="grid h-11 w-9 shrink-0 place-items-center">
-            <UserButton />
+            <UserButton>
+              <UserButton.MenuItems>
+                <UserButton.Link label="My listings" labelIcon={<Svg d={Icon.home} />} href="/listings/mine" />
+                <UserButton.Link label="Post a room" labelIcon={<Svg d={Icon.plus} />} href="/listings/new" />
+              </UserButton.MenuItems>
+            </UserButton>
           </div>
         </form>
 
@@ -452,7 +476,7 @@ export default function Home() {
                         <span className="text-ink/60"> · {l.totalRoommates} roommates</span>
                       </p>
                       <p className="mt-1 truncate text-sm text-ink/70">{l.address}</p>
-                      <Lister email={l.contactEmail} />
+                      <Lister listing={l} />
                     </div>
                   </button>
                 </article>
@@ -563,7 +587,7 @@ export default function Home() {
                   <p className="mt-2 max-w-prose leading-relaxed text-ink/80">{selected.description}</p>
                 </>
               )}
-              <Lister email={selected.contactEmail} />
+              <Lister listing={selected} />
             </div>
 
             <div className="sticky bottom-0 border-t border-ink/10 bg-white px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
@@ -716,13 +740,20 @@ function Rule({ ok, yes, no }: { ok: boolean; yes: string; no: string }) {
   );
 }
 
-// Trust signal: show which campus verified the lister (from their .edu domain).
-function Lister({ email }: { email: string }) {
-  const domain = email.split("@")[1] ?? "";
+// Trust signal: posted listings show the campus that verified the lister (their .edu domain, which the
+// server sets as contactEmail). Seed rows have no owner, so they say they're demos instead.
+function Lister({ listing }: { listing: Listing }) {
+  const email = listing.contactEmail;
   return (
     <p className="mt-3 flex items-center gap-2 border-t border-ink/10 pt-3 text-sm">
-      <span className="grid h-7 w-7 place-items-center rounded-full bg-paper font-semibold uppercase">{email[0]}</span>
-      <span className="min-w-0 truncate text-ink/70">Verified at <b className="text-ink">{domain}</b></span>
+      {listing.ownerId ? (
+        <>
+          <span className="grid h-7 w-7 place-items-center rounded-full bg-paper font-semibold uppercase">{email[0]}</span>
+          <span className="min-w-0 truncate text-ink/70">Verified at <b className="text-ink">{email.split("@")[1]}</b></span>
+        </>
+      ) : (
+        <span className="rounded-md bg-paper px-2 py-0.5 font-medium text-ink/70">Demo listing</span>
+      )}
     </p>
   );
 }

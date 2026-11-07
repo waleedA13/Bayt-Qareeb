@@ -97,6 +97,7 @@ export default function MyListings({ initial, email }: { initial: MyListing[]; e
                 <div className="mt-3 flex gap-2">
                   <button onClick={() => { setEditing(l.id); setConfirming(null); }} className={`${btn} border border-ink/20 hover:border-ink/50`}>Edit</button>
                   <button onClick={() => { setConfirming(l.id); setError(null); }} className={`${btn} text-clay hover:bg-clay/10`}>Delete</button>
+                  <Link href={`/map?listing=${l.id}`} className={`${btn} ml-auto grid place-items-center underline underline-offset-2`}>See on map</Link>
                 </div>
               )}
               {error?.id === l.id && <p role="alert" className="mt-2 text-sm font-medium text-clay">{error.msg}</p>}
