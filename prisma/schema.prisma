@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite has no enums; values enforced in app + CI validator.
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique // must end in .edu
+  name      String?
+  gender    String? // BROTHER | SISTER
+  createdAt DateTime  @default(now())
+  listings  Listing[]
+}
+
+model Listing {
+  id           String   @id @default(cuid())
+  title        String
+  address      String
+  lat          Float
+  lng          Float
+  // Room setup
+  roomType     String // PRIVATE | SHARED
+  // Capacity
+  totalRoommates Int
+  beds         Int
+  baths        Float
+  // Financials (USD / month)
+  totalRent    Int
+  rentShare    Int
+  avgUtilities Int
+  // Rules & amenities
+  petsAllowed  Boolean  @default(false)
+  halalKitchen Boolean  @default(true)
+  genderPref   String // BROTHERS | SISTERS | ANY
+  description  String?
+  contactEmail String
+  createdAt    DateTime @default(now())
+  ownerId      String?
+  owner        User?    @relation(fields: [ownerId], references: [id])
+}

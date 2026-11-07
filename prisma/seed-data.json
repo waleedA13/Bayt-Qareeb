@@ -1,0 +1,32 @@
+[
+  {
+    "title": "Quiet private room near UCLA",
+    "address": "Gayley Ave, Westwood, CA",
+    "lat": 34.0663, "lng": -118.4500,
+    "roomType": "PRIVATE", "totalRoommates": 3, "beds": 3, "baths": 2,
+    "totalRent": 4200, "rentShare": 1400, "avgUtilities": 90,
+    "petsAllowed": false, "halalKitchen": true, "genderPref": "BROTHERS",
+    "description": "5 min walk to campus, 10 min drive to the masjid. Fajr crew in the house.",
+    "contactEmail": "yusuf@ucla.edu"
+  },
+  {
+    "title": "Shared room, sisters-only townhouse",
+    "address": "Durant Ave, Berkeley, CA",
+    "lat": 37.8676, "lng": -122.2590,
+    "roomType": "SHARED", "totalRoommates": 4, "beds": 3, "baths": 1.5,
+    "totalRent": 3800, "rentShare": 750, "avgUtilities": 60,
+    "petsAllowed": true, "halalKitchen": true, "genderPref": "SISTERS",
+    "description": "Cat-friendly. Halal-only kitchen, shared groceries optional. Near MSA prayer room.",
+    "contactEmail": "maryam@berkeley.edu"
+  },
+  {
+    "title": "Private room by USC, any gender floor split",
+    "address": "W 30th St, Los Angeles, CA",
+    "lat": 34.0259, "lng": -118.2805,
+    "roomType": "PRIVATE", "totalRoommates": 2, "beds": 2, "baths": 2,
+    "totalRent": 3000, "rentShare": 1500, "avgUtilities": 110,
+    "petsAllowed": false, "halalKitchen": false, "genderPref": "ANY",
+    "description": "Separate floors, separate bathrooms. Kitchen not strictly halal.",
+    "contactEmail": "omar@usc.edu"
+  }
+]
