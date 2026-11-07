@@ -19,6 +19,8 @@ assert.deepEqual(v({ maxRent: "900" }), {});
 assert.deepEqual(v({ maxRent: 1e9 }), {});
 assert.deepEqual(v({ genderPref: "brothers" }), {});
 assert.deepEqual(v({ roomType: "STUDIO" }), {});
+assert.deepEqual(v({ propertyType: "CONDO" }), { propertyType: "CONDO" });
+assert.deepEqual(v({ propertyType: "castle" }), {});
 assert.deepEqual(v({ petsAllowed: "true", halalKitchen: 1 }), {});
 assert.deepEqual(v({ nearText: "   " }), {});
 assert.deepEqual(v({ nearText: 42 }), {});

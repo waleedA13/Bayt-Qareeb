@@ -17,6 +17,12 @@ function validate(listings) {
     if (typeof l.lat !== "number" || typeof l.lng !== "number") errors.push(`${tag}: missing lat/lng`);
     else if (Math.abs(l.lat) > 90 || Math.abs(l.lng) > 180) errors.push(`${tag}: invalid coordinates`);
     else if (!CAMPUSES.some((c) => milesBetween(c, l) <= MAX_MILES)) errors.push(`${tag}: not within ${MAX_MILES} miles of a campus`);
+    if (l.propertyType !== undefined && !["HOUSE", "APARTMENT", "CONDO", "TOWNHOUSE"].includes(l.propertyType)) errors.push(`${tag}: bad propertyType`);
+    if (l.photos !== undefined) {
+      if (!Array.isArray(l.photos)) errors.push(`${tag}: photos must be an array`);
+      else if (l.photos.length > 8) errors.push(`${tag}: more than 8 photos`);
+      else if (l.photos.some((u) => typeof u !== "string" || !/^https:\/\//.test(u))) errors.push(`${tag}: photos must be https URLs`);
+    }
     // Seed contacts must be fake so no real student gets emailed. (Posted listings use the owner's verified email.)
     if (!/^[^\s@]+@example\.edu$/i.test(l.contactEmail ?? "")) errors.push(`${tag}: contactEmail must end in @example.edu`);
     const key = String(l.title ?? "").trim().toLowerCase();

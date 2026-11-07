@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Map, { Marker, NavigationControl, type MapRef } from "react-map-gl";
 import Link from "next/link";
 import { UserButton, useUser } from "@clerk/nextjs";
+import { LogoMark } from "@/components/brand";
 import { campusForEmail } from "@/lib/campuses";
 
 // Full-bleed map with frosted-glass UI floating on top (search + filter pills, results panel),
@@ -11,15 +12,18 @@ import { campusForEmail } from "@/lib/campuses";
 
 type Listing = {
   id: string; title: string; address: string; lat: number; lng: number;
-  roomType: "PRIVATE" | "SHARED"; totalRoommates: number; beds: number; baths: number;
+  propertyType?: PropertyType; roomType: "PRIVATE" | "SHARED"; totalRoommates: number; beds: number; baths: number;
   totalRent: number; rentShare: number; avgUtilities: number;
   petsAllowed: boolean; halalKitchen: boolean; genderPref: "BROTHERS" | "SISTERS" | "ANY";
   description?: string; contactEmail: string; ownerId: string | null;
+  photos?: string[]; // exterior first, then rooms
 };
 
 type Bounds = { w: number; s: number; e: number; n: number } | null;
 type Sort = "price-asc" | "price-desc" | "roommates";
 type House = "ALL" | Listing["genderPref"];
+type PropertyType = "HOUSE" | "APARTMENT" | "CONDO" | "TOWNHOUSE";
+const PROPERTY: Record<PropertyType, string> = { HOUSE: "House", APARTMENT: "Apartment", CONDO: "Condo", TOWNHOUSE: "Townhouse" };
 
 const TOKEN = process.env.NEXT_MAPBOX_TOKEN;
 const PIN_ZOOM = 9; // UCLA and USC tags stop overlapping around here
@@ -44,19 +48,11 @@ const short = (n: number) => (n >= 1000 ? `$${(n / 1000).toFixed(n % 1000 ? 1 : 
 const snapshot = (l: Listing, w: number, h: number) =>
   `https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v12/static/pin-l+e9b949(${l.lng},${l.lat})/${l.lng},${l.lat},16.2,0/${w}x${h}@2x?logo=false&attribution=false&access_token=${TOKEN}`;
 
-// Eight-point star (Rub el Hizb), the Bayt Qareeb mark.
-function Star({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
-      <path fill="currentColor" d="M12 1l2.6 4.4L19.8 4.2 18.6 9.4 23 12l-4.4 2.6 1.2 5.2-5.2-1.2L12 23l-2.6-4.4-5.2 1.2 1.2-5.2L1 12l4.4-2.6L4.2 4.2l5.2 1.2z" />
-    </svg>
-  );
-}
-
 const Icon = {
   search: <path d="M11 4a7 7 0 100 14 7 7 0 000-14zM20 20l-3.5-3.5" />,
   spark: <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z" />,
   home: <path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z" />,
+  people: <path d="M9 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM2.5 20c.5-3.5 3.2-5.5 6.5-5.5s6 2 6.5 5.5M16 4.5a3.2 3.2 0 010 6.2M18 14.8c2 .7 3.2 2.5 3.5 5.2" />,
   dollar: <path d="M12 3v18M16.5 7.5C16 6 14.3 5 12 5s-4.5 1.2-4.5 3.2c0 4.6 9 2.4 9 7 0 2-2 3.3-4.5 3.3s-4.3-1.1-4.8-2.7" />,
   door: <path d="M6 21V4h12v17M3 21h18M14.5 12.5h.01" />,
   bowl: <path d="M3 11h18a9 9 0 01-18 0zM8 7c0-1.5 1-1.5 1-3M12 7c0-1.5 1-1.5 1-3M16 7c0-1.5 1-1.5 1-3" />,
@@ -66,6 +62,7 @@ const Icon = {
   sort: <path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4" />,
   close: <path d="M6 6l12 12M18 6L6 18" />,
   plus: <path d="M12 5v14M5 12h14" />,
+  camera: <path d="M4 8h3l2-3h6l2 3h3v11H4zM12 17a3.5 3.5 0 100-7 3.5 3.5 0 000 7z" />,
 };
 function Svg({ d, className = "h-4 w-4" }: { d: React.ReactNode; className?: string }) {
   return (
@@ -93,6 +90,7 @@ export default function Home() {
   // Filters
   const [query, setQuery] = useState("");
   const [house, setHouse] = useState<House>("ALL");
+  const [homeType, setHomeType] = useState<"ALL" | PropertyType>("ALL");
   const [minPrice, setMinPrice] = useState<number | null>(null);
   const [maxPrice, setMaxPrice] = useState<number | null>(null);
   const [privateOnly, setPrivateOnly] = useState(false);
@@ -135,7 +133,7 @@ export default function Home() {
     return () => window.removeEventListener("keydown", onKey);
   }, [selected]);
 
-  const activeFilters = [house !== "ALL", minPrice != null || maxPrice != null, privateOnly, halalOnly, petsOnly].filter(Boolean).length;
+  const activeFilters = [house !== "ALL", homeType !== "ALL", minPrice != null || maxPrice != null, privateOnly, halalOnly, petsOnly].filter(Boolean).length;
 
   const filtered = useMemo(() => {
     // A full sentence ("sisters room near UCLA") is for the AI search on Enter, so only short
@@ -144,6 +142,7 @@ export default function Home() {
     const out = listings.filter((l) =>
       (!q || l.title.toLowerCase().includes(q) || l.address.toLowerCase().includes(q)) &&
       (house === "ALL" || l.genderPref === house) &&
+      (homeType === "ALL" || (l.propertyType ?? "APARTMENT") === homeType) &&
       (minPrice == null || l.rentShare >= minPrice) &&
       (maxPrice == null || l.rentShare <= maxPrice) &&
       (!privateOnly || l.roomType === "PRIVATE") &&
@@ -155,7 +154,7 @@ export default function Home() {
       sort === "price-desc" ? b.rentShare - a.rentShare :
       a.totalRoommates - b.totalRoommates
     );
-  }, [listings, query, placed, house, minPrice, maxPrice, privateOnly, halalOnly, petsOnly, sort]);
+  }, [listings, query, placed, house, homeType, minPrice, maxPrice, privateOnly, halalOnly, petsOnly, sort]);
 
   const inView = useMemo(() => {
     if (!bounds) return filtered;
@@ -173,7 +172,7 @@ export default function Home() {
   };
 
   const clearFilters = () => {
-    setQuery(""); setHouse("ALL"); setMinPrice(null); setMaxPrice(null);
+    setQuery(""); setHouse("ALL"); setHomeType("ALL"); setMinPrice(null); setMaxPrice(null);
     setPrivateOnly(false); setHalalOnly(false); setPetsOnly(false); setAiNote(""); setPlaced(false);
   };
 
@@ -214,6 +213,7 @@ export default function Home() {
         if (!res.ok) throw new Error(data.error || "Search failed");
         const f = data.filters ?? {};
         setHouse(f.genderPref ?? "ALL");
+        setHomeType(f.propertyType ?? "ALL");
         setMinPrice(null);
         setMaxPrice(f.maxRent ?? null);
         setPrivateOnly(f.roomType === "PRIVATE");
@@ -260,7 +260,7 @@ export default function Home() {
               ? { longitude: campus.lng, latitude: campus.lat, zoom: 12.5, padding: { top: 150, bottom: 40, left: 40, right: padRight } }
               : { bounds: START_BOUNDS, fitBoundsOptions: { padding: { top: 150, bottom: 40, left: 40, right: padRight } } }}
             style={{ width: "100%", height: "100%" }}
-            mapStyle="mapbox://styles/mapbox/light-v11"
+            mapStyle="mapbox://styles/mapbox/streets-v12"
             onClick={() => { setSelected(null); setPreview(null); }}
           >
             <div className="hidden md:block"><NavigationControl position="bottom-left" showCompass={false} /></div>
@@ -316,9 +316,7 @@ export default function Home() {
       {/* Floating command bar: logo, one search box, filter pills */}
       <header className="pointer-events-none absolute inset-x-3 top-3 z-30 flex flex-col gap-2 md:right-[calc(46%+1.5rem)] xl:right-[calc(40%+1.5rem)]">
         <form onSubmit={search} className="glass pointer-events-auto flex h-14 items-center gap-2 rounded-2xl pl-2 pr-2.5 shadow-[0_10px_30px_rgba(20,33,61,0.18)]">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-ink">
-            <Star className="h-5 w-5 text-white" />
-          </span>
+          <LogoMark className="h-10 w-10 shrink-0" />
           <span className="hidden shrink-0 font-display text-lg font-bold tracking-wide lg:block">Bayt Qareeb</span>
           <label className="relative flex min-w-0 flex-1 items-center">
             <span className="sr-only">Search by campus, place, or describe what you want</span>
@@ -361,12 +359,20 @@ export default function Home() {
 
         <div className="pointer-events-auto -mx-3 flex items-center gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <Dropdown
-            icon={Icon.home}
-            label={house === "ALL" ? "House" : HOUSE[house].label}
+            icon={Icon.people}
+            label={house === "ALL" ? "Household" : HOUSE[house].label}
             active={house !== "ALL"}
-            options={[["ALL", "Any house"], ["BROTHERS", "Brothers"], ["SISTERS", "Sisters"], ["ANY", "Mixed"]]}
+            options={[["ALL", "Anyone"], ["BROTHERS", "Brothers"], ["SISTERS", "Sisters"], ["ANY", "Mixed"]]}
             value={house}
             onChange={(v) => setHouse(v as House)}
+          />
+          <Dropdown
+            icon={Icon.home}
+            label={homeType === "ALL" ? "Home type" : PROPERTY[homeType]}
+            active={homeType !== "ALL"}
+            options={[["ALL", "Any type"], ...(Object.entries(PROPERTY) as [string, string][])]}
+            value={homeType}
+            onChange={(v) => setHomeType(v as "ALL" | PropertyType)}
           />
           <PriceFilter
             min={minPrice}
@@ -473,7 +479,7 @@ export default function Home() {
                         <span className={`sm:hidden ${BADGE} ${HOUSE[l.genderPref].cls}`}>{HOUSE[l.genderPref].label}</span>
                       </div>
                       <p className="mt-2 text-sm">
-                        <b>{l.beds}</b> bd · <b>{l.baths}</b> ba · {l.roomType === "PRIVATE" ? "Private room" : "Shared room"}
+                        {PROPERTY[l.propertyType ?? "APARTMENT"]} · <b>{l.beds}</b> bd · <b>{l.baths}</b> ba · {l.roomType === "PRIVATE" ? "Private room" : "Shared room"}
                         <span className="text-ink/60"> · {l.totalRoommates} roommates</span>
                       </p>
                       <p className="mt-1 truncate text-sm text-ink/70">{l.address}</p>
@@ -498,7 +504,7 @@ export default function Home() {
             onClick={() => { setSelected(preview); setPreview(null); }}
             className="glass flex w-full overflow-hidden rounded-2xl text-left shadow-[0_8px_30px_rgba(20,33,61,0.3)]"
           >
-            <img src={snapshot(preview, 200, 200)} alt="" className="h-auto w-28 shrink-0 object-cover" />
+            <img src={preview.photos?.[0] ? sized(preview.photos[0], 300) : snapshot(preview, 200, 200)} alt="" className="h-auto w-28 shrink-0 object-cover" />
             <div className="min-w-0 flex-1 p-3">
               <p className="text-xl font-bold leading-none">{usd(preview.rentShare)}<span className="text-sm font-medium text-ink/60">/mo</span></p>
               <p className="mt-1.5 text-sm"><b>{preview.beds}</b> bd · <b>{preview.baths}</b> ba · {preview.roomType === "PRIVATE" ? "Private" : "Shared"}</p>
@@ -539,7 +545,7 @@ export default function Home() {
         {selected && (
           <div className="flex min-h-full flex-col">
             <div className="relative">
-              <Cover listing={selected} tall />
+              <PhotoTour key={selected.id} listing={selected} />
               <button
                 onClick={() => setSelected(null)}
                 aria-label="Close room details"
@@ -570,6 +576,7 @@ export default function Home() {
 
               <h3 className="mt-6 font-semibold">Facts & features</h3>
               <dl className="mt-3 grid grid-cols-2 gap-3">
+                <Fact label="Home type" value={PROPERTY[selected.propertyType ?? "APARTMENT"]} />
                 <Fact label="Room" value={selected.roomType === "PRIVATE" ? "Private" : "Shared"} />
                 <Fact label="Roommates" value={`${selected.totalRoommates} total`} />
                 <Fact label="Bedrooms" value={selected.beds} />
@@ -612,21 +619,104 @@ export default function Home() {
   );
 }
 
-function Cover({ listing: l, tall, compact }: { listing: Listing; tall?: boolean; compact?: boolean }) {
+// Unsplash URLs take a width param, so cards load small images and the tour loads large ones.
+const sized = (url: string, w: number) => url.replace(/([?&])w=\d+/, `$1w=${w}`);
+
+function Cover({ listing: l, compact }: { listing: Listing; compact?: boolean }) {
+  const photos = l.photos ?? [];
   return (
-    <div className={`relative shrink-0 overflow-hidden bg-paper ${tall ? "aspect-[16/9]" : compact ? "w-[30%] sm:w-auto sm:aspect-[16/9]" : "aspect-[16/9]"}`}>
-      {TOKEN && (
-        <img
-          src={snapshot(l, tall ? 640 : 420, tall ? 360 : 236)}
-          alt={`Map of ${l.address}`}
-          loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+    <div className={`relative shrink-0 overflow-hidden bg-paper ${compact ? "w-[30%] sm:w-auto sm:aspect-[16/9]" : "aspect-[16/9]"}`}>
+      {photos[0] ? (
+        <img src={sized(photos[0], 640)} alt={`Outside ${l.address}`} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+      ) : TOKEN && (
+        <img src={snapshot(l, 420, 236)} alt={`Map of ${l.address}`} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
       )}
-      <div className={`absolute left-2.5 top-2.5 flex-wrap gap-1.5 ${tall ? "hidden" : compact ? "hidden sm:flex" : "flex"}`}>
+      <div className={`absolute left-2.5 top-2.5 flex-wrap gap-1.5 ${compact ? "hidden sm:flex" : "flex"}`}>
         <span className={`${BADGE} shadow-sm ${HOUSE[l.genderPref].cls}`}>{HOUSE[l.genderPref].label}</span>
         {l.halalKitchen && <span className={`${BADGE} bg-white text-ink shadow-sm ring-1 ring-ink/10`}>Halal kitchen</span>}
       </div>
+      {photos.length > 1 && (
+        <span className="absolute bottom-2 right-2 hidden items-center gap-1 rounded-md bg-ink/75 px-2 py-0.5 text-[13px] font-semibold text-white backdrop-blur sm:flex">
+          <Svg d={Icon.camera} className="h-3.5 w-3.5" /> {photos.length}
+        </span>
+      )}
+    </div>
+  );
+}
+
+// Photo tour: swipeable carousel (scroll-snap) with prev/next, a counter and thumbnails.
+// The satellite view of the block is always the last stop, so every listing has at least one slide.
+function PhotoTour({ listing: l }: { listing: Listing }) {
+  const slides = [
+    ...(l.photos ?? []).map((src, i) => ({ src: sized(src, 1200), thumb: sized(src, 200), alt: `Photo ${i + 1} of ${l.title}` })),
+    ...(TOKEN ? [{ src: snapshot(l, 640, 360), thumb: snapshot(l, 120, 80), alt: `Satellite view of ${l.address}`, map: true }] : []),
+  ];
+  const track = useRef<HTMLDivElement>(null);
+  const [index, setIndex] = useState(0);
+  const go = (i: number) => {
+    const t = track.current;
+    const n = Math.max(0, Math.min(slides.length - 1, i));
+    t?.scrollTo({ left: n * t.clientWidth, behavior: "smooth" });
+  };
+  if (!slides.length) return <div className="aspect-[16/10] bg-paper" />;
+
+  return (
+    <div>
+      <div className="relative">
+        <div
+          ref={track}
+          tabIndex={0}
+          aria-roledescription="carousel"
+          aria-label={`Photos of ${l.title}`}
+          onScroll={(e) => setIndex(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowRight") { e.preventDefault(); go(index + 1); }
+            if (e.key === "ArrowLeft") { e.preventDefault(); go(index - 1); }
+          }}
+          className="flex aspect-[16/10] snap-x snap-mandatory overflow-x-auto overscroll-x-contain outline-none [scrollbar-width:none] focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-ink/30 [&::-webkit-scrollbar]:hidden"
+        >
+          {slides.map((s, i) => (
+            <img
+              key={s.src}
+              src={s.src}
+              alt={s.alt}
+              loading={i === 0 ? "eager" : "lazy"}
+              className="h-full w-full shrink-0 snap-center object-cover"
+            />
+          ))}
+        </div>
+        {slides.length > 1 && (
+          <>
+            <button type="button" onClick={() => go(index - 1)} disabled={index === 0} aria-label="Previous photo"
+              className="glass absolute left-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full transition-opacity disabled:opacity-0">
+              <Svg d={Icon.chevron} className="h-5 w-5 rotate-90" />
+            </button>
+            <button type="button" onClick={() => go(index + 1)} disabled={index === slides.length - 1} aria-label="Next photo"
+              className="glass absolute right-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full transition-opacity disabled:opacity-0">
+              <Svg d={Icon.chevron} className="h-5 w-5 -rotate-90" />
+            </button>
+            <span aria-live="polite" className="absolute bottom-3 left-3 rounded-full bg-ink/75 px-2.5 py-1 text-[13px] font-semibold text-white backdrop-blur">
+              {index + 1} / {slides.length}{"map" in slides[index] ? " · Location" : ""}
+            </span>
+          </>
+        )}
+      </div>
+      {slides.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto px-5 pt-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {slides.map((s, i) => (
+            <button
+              key={s.thumb}
+              type="button"
+              onClick={() => go(i)}
+              aria-label={`Show photo ${i + 1}`}
+              aria-current={i === index}
+              className={`h-12 w-16 shrink-0 overflow-hidden rounded-lg ring-2 transition ${i === index ? "ring-ink" : "opacity-70 ring-transparent hover:opacity-100"}`}
+            >
+              <img src={s.thumb} alt="" loading="lazy" className="h-full w-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
