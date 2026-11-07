@@ -12,8 +12,8 @@ module.exports = {
         sisters: "#8A3B6E",
       },
       fontFamily: {
-        body: ["var(--font-body)", "system-ui", "sans-serif"],
-        display: ["var(--font-display)", "var(--font-body)", "sans-serif"],
+        body: ["Figtree", "system-ui", "sans-serif"],
+        display: ["'Reem Kufi'", "Figtree", "sans-serif"],
       },
     },
   },
