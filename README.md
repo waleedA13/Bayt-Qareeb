@@ -135,5 +135,4 @@ Actions are pinned to commit SHAs and run with read-only permissions. **Vercel**
 ## 👥 Team
 - **Waleed A**: frontend, map UI, design ([@waleedA13](https://github.com/waleedA13))
 - **Aditya Jadhav**: CI/CD and auth gate ([@AdityaJadhav17](https://github.com/AdityaJadhav17))
-- **Abas Mohamed**: backend
-- **Woosik**: database and API
+- **Abas Mohamed**: backend, database and auth
