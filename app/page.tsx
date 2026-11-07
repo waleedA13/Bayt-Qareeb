@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Map, { Marker, NavigationControl } from "react-map-gl";
+import SearchBar from "@/components/SearchBar";
 
 type Listing = {
   id: string; title: string; address: string; lat: number; lng: number;
@@ -33,6 +34,7 @@ export default function Home() {
         <h1 className="text-lg font-bold text-emerald-700">Manara</h1>
         <p className="text-xs text-slate-500">Verified .edu students only · {listings.length} rooms</p>
       </header>
+      <SearchBar onResults={setListings} />
 
       <Map
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
