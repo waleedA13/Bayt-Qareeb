@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Map, { Marker, NavigationControl, type MapRef } from "react-map-gl";
-import { UserButton } from "@clerk/nextjs";
+import { UserButton, useUser } from "@clerk/nextjs";
 import SearchBar from "@/components/SearchBar";
+import { campusForEmail } from "@/lib/campuses";
 
 // Zillow-style layout: search + filter bar on top, map on the left, scrollable
 // listing cards on the right. Same data, same stack (Next + react-map-gl + Tailwind).
@@ -29,8 +30,8 @@ const HOUSE = {
   ANY: { label: "Mixed", cls: "bg-white text-ink ring-1 ring-ink/20" },
 };
 const BADGE = "rounded-md px-2 py-0.5 text-[13px] font-semibold";
-// Listings span the Bay Area to LA; start framed on them instead of the whole state.
-const START_BOUNDS: [[number, number], [number, number]] = [[-122.6, 33.8], [-117.9, 38.1]];
+// Listings span Westwood to La Jolla; start framed on them instead of the whole state.
+const START_BOUNDS: [[number, number], [number, number]] = [[-118.55, 32.8], [-117.15, 34.1]];
 
 const usd = (n: number) => `$${n.toLocaleString()}`;
 const short = (n: number) => (n >= 1000 ? `$${(n / 1000).toFixed(n % 1000 ? 1 : 0)}K` : `$${n}`);
@@ -55,6 +56,10 @@ export default function Home() {
   // Mobile map: tapping a pin shows a small preview card first (like Zillow), tap it for details.
   const [preview, setPreview] = useState<Listing | null>(null);
   const isDesktop = () => typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+  // Start the map on the student's own campus (verified email only, same rule as lib/auth.ts).
+  const { user, isLoaded } = useUser();
+  const email = user?.primaryEmailAddress;
+  const campus = email?.verification?.status === "verified" ? campusForEmail(email.emailAddress) : null;
 
   // Filters
   const [query, setQuery] = useState("");
@@ -135,6 +140,15 @@ export default function Home() {
             </span>
             <span className="hidden font-display text-xl font-bold tracking-wide sm:block">Bayt Qareeb</span>
           </div>
+          {campus && (
+            <span className="hidden shrink-0 items-center gap-1.5 rounded-full bg-paper px-3 py-1.5 text-sm font-semibold sm:inline-flex">
+              <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+                <path d="M12 21s-6-5.3-6-10a6 6 0 1112 0c0 4.7-6 10-6 10z" stroke="currentColor" strokeWidth="2" fill="none" />
+                <circle cx="12" cy="11" r="2" fill="currentColor" />
+              </svg>
+              Near {campus.name}
+            </span>
+          )}
 
           <label className="relative flex-1 sm:max-w-md">
             <span className="sr-only">Search by address, campus or neighborhood</span>
@@ -196,14 +210,17 @@ export default function Home() {
                 <code className="rounded bg-white px-1"> .env</code> and restart the dev server.
               </p>
             </div>
-          ) : (
+          ) : isLoaded && (
+            // initialViewState is read once, so wait for Clerk to know the campus before mounting.
             <Map
               ref={mapRef}
               mapboxAccessToken={TOKEN}
-              onLoad={syncBounds}
+              onLoad={(e) => { syncBounds(); setShowPrices(e.target.getZoom() >= PIN_ZOOM); }}
               onZoom={(e) => setShowPrices(e.viewState.zoom >= PIN_ZOOM)}
               onMoveEnd={syncBounds}
-              initialViewState={{ bounds: START_BOUNDS, fitBoundsOptions: { padding: 48 } }}
+              initialViewState={campus
+                ? { longitude: campus.lng, latitude: campus.lat, zoom: PIN_ZOOM + 2.5 }
+                : { bounds: START_BOUNDS, fitBoundsOptions: { padding: 48 } }}
               style={{ width: "100%", height: "100%" }}
               mapStyle="mapbox://styles/mapbox/streets-v12"
               onClick={() => { setSelected(null); setPreview(null); }}

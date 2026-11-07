@@ -37,8 +37,8 @@ Our Clerk instance is in development mode, which supports [Clerk test emails](ht
 
 ### 🗺️ 60-second demo path
 1. On the map, tap the **dot near Los Angeles**. The map flies in and price tags appear.
-2. Tap the **$1.4K** pin (near UCLA). The details panel opens.
-3. Check what generic listing sites don't show: **Brothers house**, **Halal kitchen**, **your share ($1,400) vs. the whole apartment ($4,200)**, and average utilities.
+2. Tap the **$1.5K** pin on Glenrock Ave (Westwood, near UCLA). The details panel opens.
+3. Check what generic listing sites don't show: **Brothers house**, **Halal kitchen**, **your share ($1,500) vs. the whole apartment ($4,500)**, and average utilities.
 4. Use the filters: **Sisters**, **Halal kitchen**, **Up to $800**. The list and map update together.
 5. Resize to phone width: you get a list/map toggle and a preview card when you tap a pin.
 
@@ -88,7 +88,7 @@ cp .env.example .env
 npx prisma db push
 ```
 
-**4. Load the demo listings** (Berkeley, UCLA and USC)
+**4. Load the demo listings** (60 rooms around UCLA, USC, UC Riverside, UCSD and UC Irvine; contacts are fake `@example.edu` addresses). This deletes existing listings first.
 ```bash
 npm run seed
 ```
