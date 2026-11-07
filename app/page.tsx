@@ -20,7 +20,7 @@ type Sort = "price-asc" | "price-desc" | "roommates";
 type House = "ALL" | Listing["genderPref"];
 
 const TOKEN = process.env.NEXT_MAPBOX_TOKEN;
-const PIN_ZOOM = 10;
+const PIN_ZOOM = 9; // UCLA and USC tags stop overlapping around here
 
 const HOUSE = {
   BROTHERS: { label: "Brothers", cls: "bg-white text-brothers ring-1 ring-brothers/25" },
@@ -94,6 +94,10 @@ export default function Home() {
   // AI search: Enter sends the sentence to /api/search, which turns it into the same filters.
   const [asking, setAsking] = useState(false);
   const [aiNote, setAiNote] = useState("");
+  // After Enter, the map jumps to the searched place and the list shows every room in view,
+  // so the typed text stops filtering by name.
+  const [placed, setPlaced] = useState(false);
+  const [placeName, setPlaceName] = useState("");
 
   const headingRef = useRef<HTMLHeadingElement>(null);
   const mapRef = useRef<MapRef>(null);
@@ -119,7 +123,7 @@ export default function Home() {
   const filtered = useMemo(() => {
     // A full sentence ("sisters room near UCLA") is for the AI search on Enter, so only short
     // text (a campus, street or city) filters as you type.
-    const q = isSentence(query) ? "" : query.trim().toLowerCase();
+    const q = placed || isSentence(query) ? "" : query.trim().toLowerCase();
     const out = listings.filter((l) =>
       (!q || l.title.toLowerCase().includes(q) || l.address.toLowerCase().includes(q)) &&
       (house === "ALL" || l.genderPref === house) &&
@@ -134,7 +138,7 @@ export default function Home() {
       sort === "price-desc" ? b.rentShare - a.rentShare :
       a.totalRoommates - b.totalRoommates
     );
-  }, [listings, query, house, minPrice, maxPrice, privateOnly, halalOnly, petsOnly, sort]);
+  }, [listings, query, placed, house, minPrice, maxPrice, privateOnly, halalOnly, petsOnly, sort]);
 
   const inView = useMemo(() => {
     if (!bounds) return filtered;
@@ -153,29 +157,59 @@ export default function Home() {
 
   const clearFilters = () => {
     setQuery(""); setHouse("ALL"); setMinPrice(null); setMaxPrice(null);
-    setPrivateOnly(false); setHalalOnly(false); setPetsOnly(false); setAiNote("");
+    setPrivateOnly(false); setHalalOnly(false); setPetsOnly(false); setAiNote(""); setPlaced(false);
   };
 
-  async function askAi(e: React.FormEvent) {
+  // Find a place with Mapbox geocoding and fit the map to it. Cities come back with a bounding box;
+  // campuses and addresses come back as a point, so we zoom to the neighborhood around it.
+  async function flyToPlace(place: string) {
+    if (!TOKEN) return null;
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(place)}.json?country=us&limit=1&types=place,locality,neighborhood,district,poi,address&access_token=${TOKEN}`;
+    const res = await fetch(url);
+    const hit = res.ok ? (await res.json()).features?.[0] : null;
+    if (!hit) return null;
+    const padding = { top: 160, bottom: 40, left: 40, right: padRight };
+    if (hit.bbox) {
+      const [w, s, e, n] = hit.bbox as [number, number, number, number];
+      mapRef.current?.fitBounds([[w, s], [e, n]], { padding, maxZoom: 13, duration: 1200 });
+    } else {
+      mapRef.current?.flyTo({ center: hit.center, zoom: 12.5, padding, duration: 1200 });
+    }
+    setPlaced(true);
+    setPlaceName((hit.text as string) || place);
+    if (!isDesktop()) setMobileView("list");
+    return hit.place_name as string;
+  }
+
+  async function search(e: React.FormEvent) {
     e.preventDefault();
     const text = query.trim();
-    if (!isSentence(text)) return; // short input already filters as you type
+    if (!text) return;
     setAsking(true); setAiNote("");
     try {
-      const res = await fetch("/api/search", {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query: text }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Search failed");
-      const f = data.filters ?? {};
-      setHouse(f.genderPref ?? "ALL");
-      setMinPrice(null);
-      setMaxPrice(f.maxRent ?? null);
-      setPrivateOnly(f.roomType === "PRIVATE");
-      setHalalOnly(f.halalKitchen === true);
-      setPetsOnly(f.petsAllowed === true);
-      setQuery(f.nearText ?? "");
-      setAiNote(`Filters set from “${text}”`);
+      let place = text;
+      // A sentence goes to the AI first: it sets the filters and pulls out the place ("UCLA").
+      if (isSentence(text)) {
+        const res = await fetch("/api/search", {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query: text }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Search failed");
+        const f = data.filters ?? {};
+        setHouse(f.genderPref ?? "ALL");
+        setMinPrice(null);
+        setMaxPrice(f.maxRent ?? null);
+        setPrivateOnly(f.roomType === "PRIVATE");
+        setHalalOnly(f.halalKitchen === true);
+        setPetsOnly(f.petsAllowed === true);
+        place = f.nearText ?? "";
+      }
+      const found = place ? await flyToPlace(place) : null;
+      setAiNote(
+        found ? `Showing rooms around ${found.split(",").slice(0, 2).join(",")}` :
+        place ? `Couldn't find “${place}” on the map` :
+        `Filters set from “${text}”`
+      );
     } catch (err) {
       setAiNote(err instanceof Error ? err.message : "Search failed");
     } finally {
@@ -261,7 +295,7 @@ export default function Home() {
 
       {/* Floating command bar: logo, one search box, filter pills */}
       <header className="pointer-events-none absolute inset-x-3 top-3 z-30 flex flex-col gap-2 md:right-[calc(46%+1.5rem)] xl:right-[calc(40%+1.5rem)]">
-        <form onSubmit={askAi} className="glass pointer-events-auto flex h-14 items-center gap-2 rounded-2xl pl-2 pr-2.5 shadow-[0_10px_30px_rgba(20,33,61,0.18)]">
+        <form onSubmit={search} className="glass pointer-events-auto flex h-14 items-center gap-2 rounded-2xl pl-2 pr-2.5 shadow-[0_10px_30px_rgba(20,33,61,0.18)]">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-ink">
             <Star className="h-5 w-5 text-white" />
           </span>
@@ -271,7 +305,7 @@ export default function Home() {
             <Svg d={Icon.search} className="pointer-events-none absolute left-3 h-5 w-5 text-ink/50" />
             <input
               value={query}
-              onChange={(e) => { setQuery(e.target.value); setAiNote(""); }}
+              onChange={(e) => { setQuery(e.target.value); setAiNote(""); setPlaced(false); }}
               maxLength={300}
               placeholder="Search or describe your room"
               className="h-11 w-full rounded-xl bg-white/70 pl-10 pr-3 text-[15px] outline-none ring-1 ring-ink/10 transition placeholder:text-ink/55 focus:bg-white focus:ring-2 focus:ring-ink/30"
@@ -279,7 +313,7 @@ export default function Home() {
           </label>
           <button
             type="submit"
-            disabled={asking || !isSentence(query)}
+            disabled={asking || !query.trim()}
             title="Describe what you want and press Enter"
             className="flex h-11 shrink-0 items-center gap-1.5 rounded-xl bg-ink px-3 text-sm font-semibold text-white transition hover:bg-ink/90 disabled:bg-ink/25"
           >
@@ -317,7 +351,7 @@ export default function Home() {
 
         {!aiNote && !asking && isSentence(query) && (
           <p className="glass pointer-events-auto self-start rounded-full px-3 py-1.5 text-sm font-medium">
-            Press <kbd className="rounded bg-ink/10 px-1.5 font-sans">Enter</kbd> to search with AI
+            Press <kbd className="rounded bg-ink/10 px-1.5 font-sans">Enter</kbd> to search with AI and jump to the place
           </p>
         )}
         {aiNote && (
@@ -346,7 +380,7 @@ export default function Home() {
         <div className="px-4 pb-28 pt-3 md:px-5 md:pb-6 md:pt-5">
           <div className="flex flex-wrap items-end justify-between gap-x-3 gap-y-2">
             <div className="min-w-0">
-              <h1 className="whitespace-nowrap font-display text-lg font-bold leading-tight sm:text-2xl">Rooms near campus</h1>
+              <h1 className="whitespace-nowrap font-display text-lg font-bold leading-tight sm:text-2xl">{placed && placeName ? `Rooms in ${placeName}` : "Rooms near campus"}</h1>
               <p className="mt-0.5 truncate text-sm text-ink/70">
                 {status === "loading" && "Finding rooms…"}
                 {status === "error" && "Couldn't load rooms. Refresh to try again."}
