@@ -215,9 +215,9 @@ Not built yet:
 
 ## Team
 
-- **Waleed A**: frontend, map UI, design ([@waleedA13](https://github.com/waleedA13))
-- **Aditya Jadhav**: CI/CD and auth gate ([@AdityaJadhav17](https://github.com/AdityaJadhav17))
-- **Abas Mohamed**: backend, database and auth ([@ver1log](https://github.com/ver1log))
+- **Waleed A**: the original MVP (Next.js app, Prisma schema, listings API, first `.edu` sign-up check), the CI pipeline and its hardening (least-privilege permissions, pinned actions, npm audit, gitleaks, CodeQL, Dependabot), the map UI through every version (sidebar, UI v2, glass UI, streets map), photo tours, home types and the logo ([@waleedA13](https://github.com/waleedA13))
+- **Aditya Jadhav**: the move to Supabase Postgres with Clerk `.edu` sign-in and the AI search, the landing page and glass sign-in/sign-up, mobile fixes for the public pages, posting rooms, and the 80 campus listings with the campus-centered map ([@AdityaJadhav17](https://github.com/AdityaJadhav17), [portfolio](https://adityajadhav.dev/#project-bayt-qareeb))
+- **Abas Mohamed**: a UI update to the map page ([@ver1log](https://github.com/ver1log))
 
 ## Acknowledgements
 
